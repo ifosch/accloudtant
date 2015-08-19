@@ -1,0 +1,13 @@
+name: accloudtant
+dependencies:
+- openssl=1.0.1k=1
+- pip=7.1.0=py34_0
+- python=3.4.3=0
+- readline=6.2=2
+- requests=2.7.0=py34_0
+- setuptools=18.0.1=py34_0
+- six=1.9.0=py34_0
+- zlib=1.2.8=0
+- pip:
+  - accloudtant==0.0.1.dev1
+
