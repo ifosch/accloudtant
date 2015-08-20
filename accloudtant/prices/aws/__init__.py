@@ -21,7 +21,8 @@ def process_ec2():
 
 def process_model(url, instances=None):
     """
-    Given the URL of a AWS JS pricing table generator, invokes the corresponding processing function according to section_names.
+    Given the URL of a AWS JS pricing table generator, invokes the
+    corresponding processing function according to section_names.
     """
     if instances is None:
         instances = {}
@@ -30,10 +31,12 @@ def process_model(url, instances=None):
     for js_line in io.StringIO(pricing.text.replace("\n","")):
         if 'callback' in js_line:
             data = fixLazyJson(re.sub(r".*callback\((.+)\).*", r"\1", js_line))
-            instances = section_names[js_name]['process'](json.loads(data), js_name, instances)
+            data = json.loads(data)
+            processor = section_names[js_name]['process']
+            instances = processor(data, js_name, instances)
     return instances
 
-def process_generic(data, js_name):
+def process_generic(data, js_name, instances=None):
     """
     Given a JSON with AWS pricing for a section, returns generic parameters.
     """
@@ -42,188 +45,156 @@ def process_generic(data, js_name):
         'rate': data['config'].get('rate'),
         'currencies': data['config']['currencies'],
         'regions': len(data['config']['regions']),
+        'key': section_names[js_name]['key'],
+        'kind': section_names[js_name]['kind'],
+        'name': section_names[js_name]['name'],
     }
-    return generic
+    if instances is None: instances = { generic['kind']: {}, }
+    elif generic['kind'] not in instances: instances[generic['kind']] = {}
+    return generic, instances
 
 def process_on_demand(data, js_name, instances=None):
     """
-    Given the JSON for the On Demand EC2 Instances AWS pricing, it loads instance attributes and On Demand pricing into instances dict.
+    Given the JSON for the On Demand EC2 Instances AWS pricing, it loads
+    instance attributes and On Demand pricing into instances dict.
     """
-    if instances is None:
-        instances = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances[region]:
-            instances[region][section_kind] = {}
-        section_name = "{}-{}".format(js_name, region)
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
         for instance_type in region_data['instanceTypes']:
             for size in instance_type.get('sizes', []):
                 size_name = size['size']
-                if size_name not in instances[region][section_kind]:
-                    instances[region][section_kind][size_name] = {}
-                instances[region][section_kind][size_name]['vCPU'] = size.get('vCPU')
-                size_mem = size.get('memoryGiB')
-                instances[region][section_kind][size_name]['memoryGiB'] = size_mem
-                size_storage = size.get('storageGB')
-                instances[region][section_kind][size_name]['storageGB'] = size_storage
+                if size_name not in instances[generic['kind']][region]:
+                    instances[generic['kind']][region][size_name] = {}
+                instance_data = instances[generic['kind']][region][size_name]
+                instance_data['vCPU'] = size.get('vCPU')
+                instance_data['memoryGiB'] = size.get('memoryGiB')
+                instance_data['storageGB'] = size.get('storageGB')
                 price = size['valueColumns'][0]['prices']['USD']
-                instances[region][section_kind][size_name][section_key] = price
+                instance_data[generic['key']] = price
     return instances
 
 def process_reserved(data, js_name, instances=None):
     """
-    Given the JSON for the Reserved EC2 Instances AWS pricing, it loads Reserved pricing into instances dict.
+    Given the JSON for the Reserved EC2 Instances AWS pricing, it loads
+    Reserved pricing into instances dict.
     """
-    if instances is None:
-        instances = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances[region]:
-            instances[region][section_kind] = {}
-        section_name = "{}-{}".format(js_name, region)
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
         for instance_type in region_data['instanceTypes']:
             size_name = instance_type['type']
-            if size_name not in instances[region][section_kind]:
-                instances[region][size_name] = {}
-                instances[region][section_kind][size_name] = {}
-            instances[region][section_kind][size_name][section_key] = {}
+            if size_name not in instances[generic['kind']][region]:
+                instances[generic['kind']][region][size_name] = {}
+            instance_data = instances[generic['kind']][region][size_name]
+            instance_data[generic['key']] = {}
             for term in instance_type['terms']:
                 term_name = term['term']
-                if 'ri' not in instances[region][section_kind][size_name]:
-                    instances[region][section_kind][size_name]['ri'] = {}
-                if term_name not in instances[region][section_kind][size_name]['ri']:
-                    instances[region][section_kind][size_name]['ri'][term_name] = {}
+                if 'ri' not in instance_data:
+                    instance_data['ri'] = {}
+                if term_name not in instance_data['ri']:
+                    instance_data['ri'][term_name] = {}
                 for purchase_option in term['purchaseOptions']:
                     po_name = purchase_option['purchaseOption']
                     prices = {}
                     for value in purchase_option['valueColumns']:
                         prices[value['name']] = value['prices']['USD']
-                    instances[region][section_kind][size_name]['ri'][term_name][po_name] = prices
+                    instance_data['ri'][term_name][po_name] = prices
     return instances
 
 def process_data_transfer(data, js_name, instances=None):
     """
-    Given the JSON for the Data Transfer pricing, it loads Data Transfer pricing into instances dict.
+    Given the JSON for the Data Transfer pricing, it loads Data Transfer
+    pricing into instances dict.
     """
-    if instances is None:
-        instance = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances:
-            instances[region][section_kind] = {}
-        instances[region][section_kind]['regional'] = region_data['regionalDataTransfer']
-        instances[region][section_kind]['ELB'] = region_data['elasticLBDataTransfer']
-        instances[region][section_kind]['AZ'] = region_data['azDataTransfer']
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
+        section = instances[generic['kind']][region]
+        section['regional'] = region_data['regionalDataTransfer']
+        section['ELB'] = region_data['elasticLBDataTransfer']
+        section['AZ'] = region_data['azDataTransfer']
         for dt_type in region_data['types']:
             type_name = dt_type['name']
-            if type_name not in instances[region][section_kind]: instances[region][section_kind][type_name] = {}
+            if type_name not in section: section[type_name] = {}
             for dt_tier in dt_type['tiers']:
                 price = dt_tier['prices']['USD']
-                if len(price): instances[region][section_kind][type_name][dt_tier['name']] = price
+                if len(price): section[type_name][dt_tier['name']] = price
     return instances
 
 def process_ebs(data, js_name, instances=None):
     """
-    Given the JSON for the EBS pricing, it loads EBS pricing into instances dict.
+    Given the JSON for the EBS pricing, it loads EBS pricing into instances
+    dict.
     """
-    if instances is None:
-        instances = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances[region]:
-            instances[region][section_kind] = {}
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
         for ebs_type in region_data['types']:
             price = ebs_type['values'][0]['prices']['USD']
-            instances[region][section_kind][ebs_type['name']] = price
+            instances[generic['kind']][region][ebs_type['name']] = price
     return instances
 
 def process_eip(data, js_name, instances=None):
     """
-    Given the JSON for the EIP pricing, it loads EIP pricing into instances dict.
+    Given the JSON for the EIP pricing, it loads EIP pricing into instances
+    dict.
     """
-    if instances is None:
-        instances = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances[region]:
-            instances[region][section_kind] = {}
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
         for eip_type in region_data['types'][0]['values']:
             price = eip_type['prices']['USD']
-            instances[region][section_kind][eip_type['rate']] = price
+            instances[generic['kind']][region][eip_type['rate']] = price
     return instances
 
 def process_cw(data, js_name, instances=None):
     """
-    Given the JSON for the CloudWatch pricing, it loads CloudWatch pricing into instances dict.
+    Given the JSON for the CloudWatch pricing, it loads CloudWatch pricing
+    into instances dict.
     """
-    if instances is None:
-        instances = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances[region]:
-            instances[region][section_kind] = {}
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
         for cw_type in region_data['types']:
             price = cw_type['values'][0]['prices']['USD']
-            instances[region][section_kind][cw_type['name']] = price
+            instances[generic['kind']][region][cw_type['name']] = price
     return instances
 
 def process_elb(data, js_name, instances=None):
     """
-    Given the JSON for the CloudWatch pricing, it loads CloudWatch pricing into instances dict.
+    Given the JSON for the ELB pricing, it loads ELB pricing into instances
+    dict.
     """
-    if instances is None:
-        instances = {}
-    generic = process_generic(data, js_name)
-    section_key = section_names[js_name]['key']
-    section_kind = section_names[js_name]['kind']
+    generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances:
-            instances[region] = {}
-        if section_kind not in instances[region]:
-            instances[region][section_kind] = {}
+        if region not in instances[generic['kind']]:
+            instances[generic['kind']][region] = {}
         for elb_type in region_data['types'][0]['values']:
             price = elb_type['prices']['USD']
-            instances[region][section_kind][elb_type['rate']] = price
+            instances[generic['kind']][region][elb_type['rate']] = price
     return instances
 
 def process_not_implemented(data, js_name, instances=None):
     """
     Given the JSON of a AWS pricing section which was not-implemented.
     """
-    section_kind = section_names[js_name]['kind']
-    section_name = section_names[js_name]['name']
-    warnings.warn("WARN: Parser not implemented for {} {}".format(section_kind, section_name))
+    generic, instances = process_generic(data, js_name, instances)
+    warnings.warn("WARN: Parser not implemented for {}".format(
+        generic['name']))
 
 section_names = {
     'linux-od.min.js': {
