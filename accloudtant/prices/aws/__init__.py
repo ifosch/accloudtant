@@ -111,6 +111,32 @@ def process_reserved(data, js_name, instances=None):
                     instances[region][section_kind][size_name]['ri'][term_name][po_name] = prices
     return instances
 
+def process_data_transfer(data, js_name, instances=None):
+    """
+    Given the JSON for the Data Transfer pricing, it loads Data Transfer pricing into instances dict.
+    """
+    if instances is None:
+        instance = {}
+    generic = process_generic(data, js_name)
+    section_key = section_names[js_name]['key']
+    section_kind = section_names[js_name]['kind']
+    for region_data in data['config']['regions']:
+        region = region_data['region']
+        if region not in instances:
+            instances[region] = {}
+        if section_kind not in instances:
+            instances[region][section_kind] = {}
+        instances[region][section_kind]['regional'] = region_data['regionalDataTransfer']
+        instances[region][section_kind]['ELB'] = region_data['elasticLBDataTransfer']
+        instances[region][section_kind]['AZ'] = region_data['azDataTransfer']
+        for dt_type in region_data['types']:
+            type_name = dt_type['name']
+            if type_name not in instances[region][section_kind]: instances[region][section_kind][type_name] = {}
+            for dt_tier in dt_type['tiers']:
+                price = dt_tier['prices']['USD']
+                if len(price): instances[region][section_kind][type_name][dt_tier['name']] = price
+    return instances
+
 def process_not_implemented(data, js_name, instances=None):
     """
     Given the JSON of a AWS pricing section which was not-implemented.
@@ -213,8 +239,8 @@ section_names = {
     'pricing-data-transfer-with-regions.min.js': {
         'name': 'Data Transfer',
         'key': 'dt',
-        'kind': 'other',
-        'process': process_not_implemented,
+        'kind': 'data_transfer',
+        'process': process_data_transfer,
     },
     'pricing-ebs-optimized-instances.min.js': {
         'name': 'EBS-Optimized Instances',
