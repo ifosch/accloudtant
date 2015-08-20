@@ -157,6 +157,26 @@ def process_ebs(data, js_name, instances=None):
             instances[region][section_kind][ebs_type['name']] = price
     return instances
 
+def process_eip(data, js_name, instances=None):
+    """
+    Given the JSON for the EIP pricing, it loads EIP pricing into instances dict.
+    """
+    if instances is None:
+        instances = {}
+    generic = process_generic(data, js_name)
+    section_key = section_names[js_name]['key']
+    section_kind = section_names[js_name]['kind']
+    for region_data in data['config']['regions']:
+        region = region_data['region']
+        if region not in instances:
+            instances[region] = {}
+        if section_kind not in instances[region]:
+            instances[region][section_kind] = {}
+        for eip_type in region_data['types'][0]['values']:
+            price = eip_type['prices']['USD']
+            instances[region][section_kind][eip_type['rate']] = price
+    return instances
+
 def process_not_implemented(data, js_name, instances=None):
     """
     Given the JSON of a AWS pricing section which was not-implemented.
@@ -277,8 +297,8 @@ section_names = {
     'pricing-elastic-ips.min.js': {
         'name': 'Elastic IP Addresses',
         'key': 'ei',
-        'kind': 'other',
-        'process': process_not_implemented,
+        'kind': 'eip',
+        'process': process_eip,
     },
     'pricing-cloudwatch.min.js': {
         'name': 'Amazon CloudWatch',
