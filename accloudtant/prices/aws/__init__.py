@@ -137,6 +137,26 @@ def process_data_transfer(data, js_name, instances=None):
                 if len(price): instances[region][section_kind][type_name][dt_tier['name']] = price
     return instances
 
+def process_ebs(data, js_name, instances=None):
+    """
+    Given the JSON for the EBS pricing, it loads EBS pricing into instances dict.
+    """
+    if instances is None:
+        instances = {}
+    generic = process_generic(data, js_name)
+    section_key = section_names[js_name]['key']
+    section_kind = section_names[js_name]['kind']
+    for region_data in data['config']['regions']:
+        region = region_data['region']
+        if region not in instances:
+            instances[region] = {}
+        if section_kind not in instances[region]:
+            instances[region][section_kind] = {}
+        for ebs_type in region_data['types']:
+            price = ebs_type['values'][0]['prices']['USD']
+            instances[region][section_kind][ebs_type['name']] = price
+    return instances
+
 def process_not_implemented(data, js_name, instances=None):
     """
     Given the JSON of a AWS pricing section which was not-implemented.
@@ -251,8 +271,8 @@ section_names = {
     'pricing-ebs.min.js': {
         'name': 'Amazon Elastic Block Store',
         'key': 'bs',
-        'kind': 'other',
-        'process': process_not_implemented,
+        'kind': 'ebs',
+        'process': process_ebs,
     },
     'pricing-elastic-ips.min.js': {
         'name': 'Elastic IP Addresses',
