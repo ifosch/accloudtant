@@ -177,6 +177,26 @@ def process_eip(data, js_name, instances=None):
             instances[region][section_kind][eip_type['rate']] = price
     return instances
 
+def process_cw(data, js_name, instances=None):
+    """
+    Given the JSON for the CloudWatch pricing, it loads CloudWatch pricing into instances dict.
+    """
+    if instances is None:
+        instances = {}
+    generic = process_generic(data, js_name)
+    section_key = section_names[js_name]['key']
+    section_kind = section_names[js_name]['kind']
+    for region_data in data['config']['regions']:
+        region = region_data['region']
+        if region not in instances:
+            instances[region] = {}
+        if section_kind not in instances[region]:
+            instances[region][section_kind] = {}
+        for cw_type in region_data['types']:
+            price = cw_type['values'][0]['prices']['USD']
+            instances[region][section_kind][cw_type['name']] = price
+    return instances
+
 def process_not_implemented(data, js_name, instances=None):
     """
     Given the JSON of a AWS pricing section which was not-implemented.
@@ -303,8 +323,8 @@ section_names = {
     'pricing-cloudwatch.min.js': {
         'name': 'Amazon CloudWatch',
         'key': 'cw',
-        'kind': 'other',
-        'process': process_not_implemented,
+        'kind': 'cw',
+        'process': process_cw,
     },
     'pricing-elb.min.js': {
         'name': 'Elastic Load Balancing',
