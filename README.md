@@ -6,7 +6,7 @@ It is a AWS cost calculator oriented to ease the life of an administrator by pro
 
 In order to have development environment working fine, it is required to follow these steps:
 
-  1. Optionally create your environment. If using Conda:
+  1. Optionally create your environment. If using [Conda](http://conda.pydata.org/docs/intro.html):
 
         conda env create
 
