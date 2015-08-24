@@ -4,7 +4,7 @@ import io
 import tokenize
 import token
 
-def fixLazyJson(in_text):
+def fix_lazy_json(in_text):
     """
     This function modifies JS-contained JSON to be valid.
 
