@@ -14,9 +14,9 @@ def process_ec2():
     instances = {}
     pricings = requests.get('http://aws.amazon.com/ec2/pricing/')
     for html_line in io.StringIO(pricings.text):
-        if 'model:' in html_line:
-            url = re.sub(r".+'(.+)'.+", r"http:\1", html_line.strip())
-            instances = process_model(url, instances)
+         if 'model:' in html_line:
+             url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())
+             instances = process_model(url, instances)
     return instances
 
 def process_model(url, instances=None):
