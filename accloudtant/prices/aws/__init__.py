@@ -32,8 +32,8 @@ def process_model(url, instances=None):
         if 'callback' in js_line:
             data = fix_lazy_json(re.sub(r".*callback\((.+)\).*", r"\1", js_line))
             data = json.loads(data)
-            processor = section_names[js_name]['process']
-            instances = processor(data, js_name, instances)
+    processor = section_names[js_name]['process']
+    instances = processor(data, js_name, instances)
     return instances
 
 def process_generic(data, js_name, instances=None):
