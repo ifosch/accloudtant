@@ -43,6 +43,19 @@ def mock_process_model():
 
     return MockProcessModel()
 
+@pytest.fixture
+def mock_processor():
+    class MockProcessor(object):
+        def __call__(self, data, js_name, instances):
+            self.data_sets.append(data)
+            instances.update(data)
+            return instances
+
+        def __init__(self):
+            self.data_sets = []
+
+    return MockProcessor()
+
 def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
     sample_content = {
         'http://a0.awsstatic.com/pricing/1/ec2/linux-od.min.js': { 'linux': {} },
@@ -69,3 +82,32 @@ def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
     for url in sample_urls:
         assert('http:{}'.format(url) in mock_process_model.urls)
     assert(result == {'linux': {}, 'rhel': {}})
+
+def test_model_process(monkeypatch, mock_requests_get, mock_processor):
+    sample_urls = {
+        'http://a0.awsstatic.com/pricing/1/ec2/linux-od.min.js',
+        'http://a0.awsstatic.com/pricing/1/ec2/rhel-od.min.js',
+        }
+    sample_content = {
+        'http://a0.awsstatic.com/pricing/1/ec2/linux-od.min.js': 'callback({xxx: "xxx"})',
+        'http://a0.awsstatic.com/pricing/1/ec2/rhel-od.min.js': 'callback({yyy: "yyy"})',
+        }
+
+    monkeypatch.setattr('requests.get', mock_requests_get)
+    mock_requests_get.set_responses(sample_content)
+    monkeypatch.setattr('accloudtant.prices.aws.section_names', {
+        'linux-od.min.js': {
+           'process': mock_processor,
+           },
+        'rhel-od.min.js': {
+           'process': mock_processor,
+           },
+        })
+
+    result = None
+    for url in sample_urls:
+        result = process_model(url, result)
+
+    for url in sample_content:
+        assert(url in mock_requests_get.urls)
+    assert(result == {'xxx': 'xxx', 'yyy': 'yyy'})
