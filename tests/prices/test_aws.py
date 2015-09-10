@@ -34,7 +34,6 @@ def mock_process_model():
 
         def __call__(self, url, instances):
             self.urls.append(url)
-            print(self.responses)
             instances.update(self.responses[url])
             return instances
 
