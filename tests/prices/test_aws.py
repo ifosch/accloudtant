@@ -56,6 +56,23 @@ def mock_processor():
 
     return MockProcessor()
 
+@pytest.fixture
+def mock_process_generic():
+    class MockProcessGeneric(object):
+        def __call__(self, data, js_name, instances):
+            kind, key = js_name.split('.')[0].split('-')
+            generic = {
+                'version': "0.1",
+                'kind': kind,
+                'key': key,
+                }
+            if instances is None: instances = {}
+            processed_data = {}
+            instances.update({ kind: processed_data })
+            return generic, instances
+
+    return MockProcessGeneric()
+
 def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
     sample_content = {
         'http://a0.awsstatic.com/pricing/1/ec2/linux-od.min.js': { 'linux': {} },
@@ -83,7 +100,7 @@ def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
         assert('http:{}'.format(url) in mock_process_model.urls)
     assert(result == {'linux': {}, 'rhel': {}})
 
-def test_model_process(monkeypatch, mock_requests_get, mock_processor):
+def test_process_model(monkeypatch, mock_requests_get, mock_processor):
     sample_urls = {
         'http://ec2/linux-od.min.js',
         'http://ec2/rhel-od.min.js',
@@ -112,7 +129,7 @@ def test_model_process(monkeypatch, mock_requests_get, mock_processor):
         assert(url in mock_requests_get.urls)
     assert(result == {'xxx': 'xxx', 'yyy': 'yyy'})
 
-def test_model_generic(monkeypatch):
+def test_process_generic(monkeypatch):
     data_no_rate = {
         'vers': "0.1",
         'config': {
@@ -154,3 +171,65 @@ def test_model_generic(monkeypatch):
         if 'rate' in data['config']:
             assert(generic['rate'] == data['config']['rate'])
     assert('linux' in instances and 'rhel' in instances)
+
+def test_process_on_demand(monkeypatch, mock_process_generic):
+    data_rate = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                    'region' : 'us-east-1',
+                    'instanceTypes': [{
+                        'type': 'generalCurrentGen',
+                        'sizes': [{
+                                'size': 't2.micro',
+                                'vCPU': '1',
+                                'memoryGiB': '1',
+                                'storageGB': 'ebsonly',
+                                'valueColumns': [{
+                                    'prices': { 'USD': '0.01', },
+                                    },],
+                                },],
+                            },],
+                    },{
+                    'region' : 'us-west-1',
+                    'instanceTypes': [{
+                        'type': 'generalCurrentGen',
+                        'sizes': [{
+                            'size': 't2.micro',
+                            'vCPU': '1',
+                            'memoryGiB': '1',
+                            'storageGB': 'ebsonly',
+                            'valueColumns': [{
+                                'prices': { 'USD': '0.01', },
+                                },],
+                            },],
+                        },],
+                    },],
+            },
+        }
+    sample_content = {
+        'http://ec2/linux-od.min.js': data_rate,
+        'http://ec2/rhel-od.min.js': data_rate,
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    for url, data in sample_content.items():
+        js_name = url.split('/')[-1]
+        instances = process_on_demand(data, js_name, instances)
+    assert('linux' in instances and 'rhel' in instances)
+    for kind in instances:
+        assert('us-east-1' in instances[kind] and 'us-west-1' in instances[kind])
+        for region in instances[kind]:
+            assert('t2.micro' in instances[kind][region])
+            instance_size = instances[kind][region]['t2.micro']
+            assert(instance_size['vCPU'] == '1')
+            assert(instance_size['memoryGiB'] == '1')
+            assert(instance_size['storageGB'] == 'ebsonly')
+            assert(instance_size['od'] == '0.01')
