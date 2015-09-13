@@ -60,15 +60,15 @@ def mock_processor():
 def mock_process_generic():
     class MockProcessGeneric(object):
         def __call__(self, data, js_name, instances):
-            kind, key = js_name.split('.')[0].split('-')
+            section = section_names[js_name]
             generic = {
                 'version': "0.1",
-                'kind': kind,
-                'key': key,
+                'kind': section['kind'],
+                'key': section['key'],
                 }
             if instances is None: instances = {}
             processed_data = {}
-            instances.update({ kind: processed_data })
+            instances.update({ section['kind']: processed_data })
             return generic, instances
 
     return MockProcessGeneric()
@@ -223,9 +223,10 @@ def test_process_on_demand(monkeypatch, mock_process_generic):
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
         instances = process_on_demand(data, js_name, instances)
+    regions = [region['region'] for region in data_rate['config']['regions']]
     assert('linux' in instances and 'rhel' in instances)
     for kind in instances:
-        assert('us-east-1' in instances[kind] and 'us-west-1' in instances[kind])
+        assert(region in instances[kind] for region in regions)
         for region in instances[kind]:
             assert('t2.micro' in instances[kind][region])
             instance_size = instances[kind][region]['t2.micro']
@@ -233,3 +234,204 @@ def test_process_on_demand(monkeypatch, mock_process_generic):
             assert(instance_size['memoryGiB'] == '1')
             assert(instance_size['storageGB'] == 'ebsonly')
             assert(instance_size['od'] == '0.01')
+
+def test_process_reserved(monkeypatch, mock_process_generic):
+    data_rate = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                'region' : 'us-east-1',
+                'instanceTypes': [{
+                  'type': 't2.micro',
+                  'terms': [{
+                      'term': 'yrTerm1',
+                      'purchaseOptions': [{
+                          'purchaseOption': 'noUpfront',
+                          'savingsOverOD': '31%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '0' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '6.57' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.009' },
+                              },],
+                          },{
+                          'purchaseOption': 'partialUpfront',
+                          'savingsOverOD': '32%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '51' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '2.19' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0088' },
+                              },],
+                          },{
+                          'purchaseOption': 'allUpfront',
+                          'savingsOverOD': '34%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '75' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '0' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0086' },
+                              },],
+                          },]
+                      },{
+                      'term': 'yrTerm3',
+                      'purchaseOptions': [{
+                          'purchaseOption': 'partialUpfront',
+                          'savingsOverOD': '53%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '109' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '1.46' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0061' },
+                              },],
+                          },{
+                          'purchaseOption': 'allUpfront',
+                          'savingsOverOD': '56%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '151' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '0' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0057' },
+                              },],
+                          },]
+                      },]
+                   },],
+                },{
+                'region' : 'us-west-1',
+                'instanceTypes': [{
+                  'type': 't2.micro',
+                  'terms': [{
+                      'term': 'yrTerm1',
+                      'purchaseOptions': [{
+                          'purchaseOption': 'noUpfront',
+                          'savingsOverOD': '31%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '0' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '6.57' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.009' },
+                              },],
+                          },{
+                          'purchaseOption': 'partialUpfront',
+                          'savingsOverOD': '32%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '51' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '2.19' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0088' },
+                              },],
+                          },{
+                          'purchaseOption': 'allUpfront',
+                          'savingsOverOD': '34%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '75' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '0' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0086' },
+                              },],
+                          },]
+                      },{
+                      'term': 'yrTerm3',
+                      'purchaseOptions': [{
+                          'purchaseOption': 'partialUpfront',
+                          'savingsOverOD': '53%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '109' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '1.46' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0061' },
+                              },],
+                          },{
+                          'purchaseOption': 'allUpfront',
+                          'savingsOverOD': '56%',
+                          'valueColumns': [{
+                              'name': 'upfront',
+                              'prices': { 'USD': '151' },
+                              },{
+                              'name': 'monthlyStar',
+                              'prices': { 'USD': '0' },
+                              },{
+                              'name': 'effectiveHourly',
+                              'prices': { 'USD': '0.0057' },
+                              },],
+                          },]
+                      },]
+                  },],
+                },],
+            },
+        }
+    sample_content = {
+        'http://ec2/linux-unix-shared.min.js': data_rate,
+        'http://ec2/red-hat-enterprise-linux-shared.min.js': data_rate,
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    for url, data in sample_content.items():
+        js_name = url.split('/')[-1]
+        instances = process_reserved(data, js_name, instances)
+    assert('linux' in instances and 'rhel' in instances)
+    regions = [region['region'] for region in data_rate['config']['regions']]
+    for kind in instances:
+        assert(region in instances[kind] for region in regions)
+        for region in instances[kind]:
+            assert('t2.micro' in instances[kind][region])
+            instance_size = instances[kind][region]['t2.micro']
+            assert('ri' in instance_size)
+            instance_reserved = instance_size['ri']
+            terms = ['yrTerm1', 'yrTerm3']
+            assert(term in instance_reserved for term in terms)
+            for term in terms:
+                for purchase_opt in ['partialUpfront', 'allUpfront']:
+                    assert(purchase_opt in instance_reserved[term])
+                    purchase_parts = instance_reserved[term][purchase_opt]
+                    assert('upfront' in purchase_parts)
+                    assert('monthlyStar' in purchase_parts)
+                    assert('effectiveHourly' in purchase_parts)
+            assert('noUpfront' in instance_reserved['yrTerm1'])
+            no_upfront = instance_reserved['yrTerm1']['noUpfront']
+            assert(no_upfront['upfront'] == '0')
+            assert(no_upfront['monthlyStar'] == '6.57')
+            assert(no_upfront['effectiveHourly'] == '0.009')
