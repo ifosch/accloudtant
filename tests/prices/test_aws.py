@@ -671,3 +671,49 @@ def test_process_eip(monkeypatch, mock_process_generic):
         assert('perNonAttachedPerHour' in region_data)
         assert('perRemapFirst100' in region_data)
         assert('perRemapOver100' in region_data)
+
+def test_process_cw(monkeypatch, mock_process_generic):
+    data = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                'region': 'us-east',
+                'types': [{
+                    'name': 'ec2Monitoring',
+                    'values': [{
+                        'prices': { 'USD': '3.50' }
+                        },],
+                    },{
+                    'name': 'ec2BasicMonitoring',
+                    'values': [{
+                        'prices': { 'USD': '0.00' },
+                        'rate': 'freeOfCharge'
+                        },],
+                    },{
+                    'name': 'cwCustomMetrics',
+                    'values': [{
+                        'prices': { 'USD': '0.50' },
+                        'rate': 'cwMetricsPerMonth'
+                        },],
+                    },],
+                },],
+            },
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    js_name = 'pricing-cloudwatch.min.js'
+    instances = process_cw(data, js_name, instances)
+    assert('cw' in instances)
+    regions = [region['region'] for region in data['config']['regions']]
+    for region in regions:
+        region_data = instances['cw'][region]
+        assert('ec2Monitoring' in region_data)
+        assert('ec2BasicMonitoring' in region_data)
+        assert('cwCustomMetrics' in region_data)
