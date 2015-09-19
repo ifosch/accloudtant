@@ -540,7 +540,7 @@ def test_process_data_transfer(monkeypatch, mock_process_generic):
     instances = process_data_transfer(data, js_name, instances)
     assert('data_transfer' in instances)
     regions = [region['region'] for region in data['config']['regions']]
-    for region in instances['data_transfer']:
+    for region in regions:
         region_data = instances['data_transfer'][region]
         assert('dataXferInEC2' in region_data)
         assert('Internet' in region_data['dataXferInEC2'])
@@ -570,3 +570,56 @@ def test_process_data_transfer(monkeypatch, mock_process_generic):
         assert('AZ' in region_data)
         assert('regional' in region_data)
         assert('ELB' in region_data)
+
+def test_process_ebs(monkeypatch, mock_process_generic):
+    data = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                'region': 'us-east',
+                'types': [{
+                    'name': 'ebsVols',
+                    'values': [{
+                        'prices': { 'USD': '0.10' },
+                        'rate': 'perGBmoProvStorage'
+                        },{
+                        'prices': { 'USD': '0.10' },
+                        'rate': 'perMMIOreq'
+                        },],
+                    },{
+                    'name': 'ebsPIOPSVols',
+                    'values': [{
+                        'prices': { 'USD': '0.125' },
+                        'rate': 'perGBmoProvStorage'
+                        },{
+                        'prices': { 'USD': '0.10' },
+                        'rate': 'perPIOPSreq'
+                        },],
+                    },{
+                    'name': 'ebsSnapsToS3',
+                    'values': [{
+                        'prices': { 'USD': '0.095' },
+                        'rate': 'perGBmoDataStored'
+                        },],
+                    },],
+                },],
+            },
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    js_name = 'pricing-ebs.min.js'
+    instances = process_ebs(data, js_name, instances)
+    assert('ebs' in instances)
+    regions = [region['region'] for region in data['config']['regions']]
+    for region in regions:
+        region_data = instances['ebs'][region]
+        assert('ebsVols' in region_data)
+        assert('ebsPIOPSVols' in region_data)
+        assert('ebsSnapsToS3' in region_data)
