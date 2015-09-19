@@ -16,7 +16,7 @@ def mock_requests_get():
             else:
                 self.text = 'Default response'
             return self
-    
+
         def __init__(self, responses = None):
             self.set_responses(responses)
             self.urls = []
@@ -435,3 +435,138 @@ def test_process_reserved(monkeypatch, mock_process_generic):
             assert(no_upfront['upfront'] == '0')
             assert(no_upfront['monthlyStar'] == '6.57')
             assert(no_upfront['effectiveHourly'] == '0.009')
+
+def test_process_data_transfer(monkeypatch, mock_process_generic):
+    data = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                'region': 'us-east-1',
+                'types': [{
+                    'name': 'dataXferInEC2',
+                    'tiers': [{
+                        'name': 'Internet',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'anotherRegion',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'anotherService',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'sameAZText',
+                        'prices': { 'USD': '' }
+                        },{
+                        'name': 'sameAZprivateIP',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'sameAZpublicIP',
+                        'prices': { 'USD': '0.01' }
+                        },{
+                        'name': 'crossAZ',
+                        'prices': { 'USD': '0.01' }
+                        },],
+                    },{
+                    'name': 'dataXferOutEC2',
+                    'tiers': [{
+                        'name': 'anotherServiceOut',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'sameAZTextOut',
+                        'prices': { 'USD': '' }
+                        },{
+                        'name': 'sameAZprivateIPOut',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'sameAZpublicIPOut',
+                        'prices': { 'USD': '0.01' }
+                        },{
+                        'name': 'crossAZOut',
+                        'prices': { 'USD': '0.01' }
+                        },{
+                        'name': 'crossRegion',
+                        'prices': { 'USD': '0.02' }
+                        },{
+                        'name': 'Amazon CloudFront',
+                        'prices': { 'USD': '0.00' }
+                        },],
+                    },{
+                    'name': 'dataXferOutInternet',
+                    'tiers': [{
+                        'name': 'firstGBout',
+                        'prices': { 'USD': '0.00' }
+                        },{
+                        'name': 'upTo10TBout',
+                        'prices': { 'USD': '0.09' }
+                        },{
+                        'name': 'next40TBout',
+                        'prices': { 'USD': '0.085' }
+                        },{
+                        'name': 'next100TBout',
+                        'prices': { 'USD': '0.07' }
+                        },{
+                        'name': 'next350TBout',
+                        'prices': { 'USD': '0.05' }
+                        },{
+                        'name': 'next05PBout',
+                        'prices': { 'USD': 'contactus' }
+                        },{
+                        'name': 'next4PBout',
+                        'prices': { 'USD': 'contactus' }
+                        },{
+                        'name': 'greater5PBout',
+                        'prices': { 'USD': 'contactus' }
+                        },],
+                    },],
+                'azDataTransfer': { 'prices': { 'USD': '0.00' } },
+                'regionalDataTransfer': { 'prices': { 'USD': '0.01' } },
+                'elasticLBDataTransfer': {
+                    'prices': { 'USD': '0.01' },
+                    'rate': 'perGBin/out'
+                    },
+                },],
+            },
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    js_name = 'pricing-data-transfer-with-regions.min.js'
+    instances = process_data_transfer(data, js_name, instances)
+    assert('data_transfer' in instances)
+    regions = [region['region'] for region in data['config']['regions']]
+    for region in instances['data_transfer']:
+        region_data = instances['data_transfer'][region]
+        assert('dataXferInEC2' in region_data)
+        assert('Internet' in region_data['dataXferInEC2'])
+        assert('anotherRegion' in region_data['dataXferInEC2'])
+        assert('anotherService' in region_data['dataXferInEC2'])
+        assert('sameAZText' not in region_data['dataXferInEC2'])
+        assert('sameAZprivateIP' in region_data['dataXferInEC2'])
+        assert('sameAZpublicIP' in region_data['dataXferInEC2'])
+        assert('crossAZ' in region_data['dataXferInEC2'])
+        assert('dataXferOutEC2' in region_data)
+        assert('anotherServiceOut' in region_data['dataXferOutEC2'])
+        assert('sameAZTextOut' not in region_data['dataXferOutEC2'])
+        assert('sameAZprivateIPOut' in region_data['dataXferOutEC2'])
+        assert('sameAZpublicIPOut' in region_data['dataXferOutEC2'])
+        assert('crossAZOut' in region_data['dataXferOutEC2'])
+        assert('crossRegion' in region_data['dataXferOutEC2'])
+        assert('Amazon CloudFront' in region_data['dataXferOutEC2'])
+        assert('dataXferOutInternet' in region_data)
+        assert('firstGBout' in region_data['dataXferOutInternet'])
+        assert('upTo10TBout' in region_data['dataXferOutInternet'])
+        assert('next40TBout' in region_data['dataXferOutInternet'])
+        assert('next100TBout' in region_data['dataXferOutInternet'])
+        assert('next350TBout' in region_data['dataXferOutInternet'])
+        assert('next05PBout' in region_data['dataXferOutInternet'])
+        assert('next4PBout' in region_data['dataXferOutInternet'])
+        assert('greater5PBout' in region_data['dataXferOutInternet'])
+        assert('AZ' in region_data)
+        assert('regional' in region_data)
+        assert('ELB' in region_data)
