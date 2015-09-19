@@ -717,3 +717,39 @@ def test_process_cw(monkeypatch, mock_process_generic):
         assert('ec2Monitoring' in region_data)
         assert('ec2BasicMonitoring' in region_data)
         assert('cwCustomMetrics' in region_data)
+
+def test_process_elb(monkeypatch, mock_process_generic):
+    data = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                'region': 'us-east',
+                'types': [{
+                    'values': [{
+                        'prices': { 'USD': '0.025' },
+                        'rate': 'perELBHour'
+                        },{
+                        'prices': { 'USD': '0.008' },
+                        'rate': 'perGBProcessed'
+                        },],
+                    },],
+                }]
+            },
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    js_name = 'pricing-elb.min.js'
+    instances = process_elb(data, js_name, instances)
+    assert('elb' in instances)
+    regions = [region['region'] for region in data['config']['regions']]
+    for region in regions:
+        region_data = instances['elb'][region]
+        assert('perELBHour' in region_data)
+        assert('perGBProcessed' in region_data)
