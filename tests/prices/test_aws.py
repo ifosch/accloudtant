@@ -623,3 +623,51 @@ def test_process_ebs(monkeypatch, mock_process_generic):
         assert('ebsVols' in region_data)
         assert('ebsPIOPSVols' in region_data)
         assert('ebsSnapsToS3' in region_data)
+
+def test_process_eip(monkeypatch, mock_process_generic):
+    data = {
+        'vers': "0.1",
+        'config': {
+            'rate': 'perh',
+            'currencies': ['USD'],
+            'regions': [{
+                'region': 'us-east',
+                'types': [{
+                    'values': [{
+                        'prices': { 'USD': '0.00' },
+                        'rate': 'oneEIP'
+                        },{
+                        'prices': { 'USD': '0.005' },
+                        'rate': 'perAdditionalEIPPerHour'
+                        },{
+                        'prices': { 'USD': '0.005' },
+                        'rate': 'perNonAttachedPerHour'
+                        },{
+                        'prices': { 'USD': '0.00' },
+                        'rate': 'perRemapFirst100'
+                        },{
+                        'prices': { 'USD': '0.10' },
+                        'rate': 'perRemapOver100'
+                        },],
+                    },],
+                },],
+            },
+        }
+
+    monkeypatch.setattr(
+        'accloudtant.prices.aws.process_generic',
+        mock_process_generic
+        )
+
+    instances = None
+    js_name = 'pricing-elastic-ips.min.js'
+    instances = process_eip(data, js_name, instances)
+    assert('eip' in instances)
+    regions = [region['region'] for region in data['config']['regions']]
+    for region in regions:
+        region_data = instances['eip'][region]
+        assert('oneEIP' in region_data)
+        assert('perAdditionalEIPPerHour' in region_data)
+        assert('perNonAttachedPerHour' in region_data)
+        assert('perRemapFirst100' in region_data)
+        assert('perRemapOver100' in region_data)
