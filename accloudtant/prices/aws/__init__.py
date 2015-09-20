@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 import io
 import json
@@ -7,6 +7,7 @@ import warnings
 import requests
 from accloudtant.utils import fix_lazy_json
 
+
 def process_ec2():
     """
     This function drives the AWS EC2 pricing processing.
@@ -14,10 +15,11 @@ def process_ec2():
     instances = {}
     pricings = requests.get('http://aws.amazon.com/ec2/pricing/')
     for html_line in io.StringIO(pricings.text):
-         if 'model:' in html_line:
-             url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())
-             instances = process_model(url, instances)
+        if 'model:' in html_line:
+            url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())
+            instances = process_model(url, instances)
     return instances
+
 
 def process_model(url, instances=None):
     """
@@ -28,13 +30,15 @@ def process_model(url, instances=None):
         instances = {}
     js_name = url.split('/')[-1]
     pricing = requests.get(url)
-    for js_line in io.StringIO(pricing.text.replace("\n","")):
+    for js_line in io.StringIO(pricing.text.replace("\n", "")):
         if 'callback' in js_line:
-            data = fix_lazy_json(re.sub(r".*callback\((.+)\).*", r"\1", js_line))
+            data = fix_lazy_json(
+                    re.sub(r".*callback\((.+)\).*", r"\1", js_line))
             data = json.loads(data)
     processor = section_names[js_name]['process']
     instances = processor(data, js_name, instances)
     return instances
+
 
 def process_generic(data, js_name, instances=None):
     """
@@ -49,9 +53,11 @@ def process_generic(data, js_name, instances=None):
         'kind': section_names[js_name]['kind'],
         'name': section_names[js_name]['name'],
     }
-    if instances is None: instances = { generic['kind']: {}, }
-    elif generic['kind'] not in instances: instances[generic['kind']] = {}
+    instances = instances or {generic['kind']: {}, }
+    if generic['kind'] not in instances:
+        instances[generic['kind']] = {}
     return generic, instances
+
 
 def process_on_demand(data, js_name, instances=None):
     """
@@ -75,6 +81,7 @@ def process_on_demand(data, js_name, instances=None):
                 price = size['valueColumns'][0]['prices']['USD']
                 instance_data[generic['key']] = price
     return instances
+
 
 def process_reserved(data, js_name, instances=None):
     """
@@ -106,6 +113,7 @@ def process_reserved(data, js_name, instances=None):
                     instance_data['ri'][term_name][po_name] = prices
     return instances
 
+
 def process_data_transfer(data, js_name, instances=None):
     """
     Given the JSON for the Data Transfer pricing, it loads Data Transfer
@@ -122,11 +130,14 @@ def process_data_transfer(data, js_name, instances=None):
         section['AZ'] = region_data['azDataTransfer']
         for dt_type in region_data['types']:
             type_name = dt_type['name']
-            if type_name not in section: section[type_name] = {}
+            if type_name not in section:
+                section[type_name] = {}
             for dt_tier in dt_type['tiers']:
                 price = dt_tier['prices']['USD']
-                if len(price): section[type_name][dt_tier['name']] = price
+                if len(price):
+                    section[type_name][dt_tier['name']] = price
     return instances
+
 
 def process_ebs(data, js_name, instances=None):
     """
@@ -143,6 +154,7 @@ def process_ebs(data, js_name, instances=None):
             instances[generic['kind']][region][ebs_type['name']] = price
     return instances
 
+
 def process_eip(data, js_name, instances=None):
     """
     Given the JSON for the EIP pricing, it loads EIP pricing into instances
@@ -157,6 +169,7 @@ def process_eip(data, js_name, instances=None):
             price = eip_type['prices']['USD']
             instances[generic['kind']][region][eip_type['rate']] = price
     return instances
+
 
 def process_cw(data, js_name, instances=None):
     """
@@ -173,6 +186,7 @@ def process_cw(data, js_name, instances=None):
             instances[generic['kind']][region][cw_type['name']] = price
     return instances
 
+
 def process_elb(data, js_name, instances=None):
     """
     Given the JSON for the ELB pricing, it loads ELB pricing into instances
@@ -188,6 +202,7 @@ def process_elb(data, js_name, instances=None):
             instances[generic['kind']][region][elb_type['rate']] = price
     return instances
 
+
 def process_not_implemented(data, js_name, instances=None):
     """
     Given the JSON of a AWS pricing section which was not-implemented.
@@ -195,6 +210,7 @@ def process_not_implemented(data, js_name, instances=None):
     generic, instances = process_generic(data, js_name, instances)
     warnings.warn("WARN: Parser not implemented for {}".format(
         generic['name']))
+    return instances
 
 section_names = {
     'linux-od.min.js': {
