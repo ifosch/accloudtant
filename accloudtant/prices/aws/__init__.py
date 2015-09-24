@@ -8,6 +8,10 @@ import requests
 from accloudtant.utils import fix_lazy_json
 
 
+def print_prices():
+    print('EC2:')
+
+
 def process_ec2():
     """
     This function drives the AWS EC2 pricing processing.
