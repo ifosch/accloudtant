@@ -1,5 +1,5 @@
 import pytest
-import accloudtant.prices.aws
+import accloudtant.aws.prices
 
 
 @pytest.fixture
@@ -81,7 +81,7 @@ def mock_processor():
 def mock_process_generic():
     class MockProcessGeneric(object):
         def __call__(self, data, js_name, instances):
-            section = accloudtant.prices.aws.section_names[js_name]
+            section = accloudtant.aws.prices.section_names[js_name]
             generic = {
                 'version': "0.1",
                 'kind': section['kind'],
@@ -110,12 +110,12 @@ def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
     monkeypatch.setattr('requests.get', mock_requests_get)
     mock_requests_get.set_responses({main_url: main_reply, })
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_model',
+        'accloudtant.aws.prices.process_model',
         mock_process_model
         )
     mock_process_model.set_responses(sample_content)
 
-    result = accloudtant.prices.aws.process_ec2()
+    result = accloudtant.aws.prices.process_ec2()
 
     assert(main_url in mock_requests_get.urls)
     for url in sample_urls:
@@ -135,7 +135,7 @@ def test_process_model(monkeypatch, mock_requests_get, mock_processor):
 
     monkeypatch.setattr('requests.get', mock_requests_get)
     mock_requests_get.set_responses(sample_content)
-    monkeypatch.setattr('accloudtant.prices.aws.section_names', {
+    monkeypatch.setattr('accloudtant.aws.prices.section_names', {
         'linux-od.min.js': {
            'process': mock_processor,
            },
@@ -146,7 +146,7 @@ def test_process_model(monkeypatch, mock_requests_get, mock_processor):
 
     result = None
     for url in sample_urls:
-        result = accloudtant.prices.aws.process_model(url, result)
+        result = accloudtant.aws.prices.process_model(url, result)
 
     for url in sample_content:
         assert(url in mock_requests_get.urls)
@@ -174,7 +174,7 @@ def test_process_generic(monkeypatch):
         'http://ec2/rhel-od.min.js': data_rate,
         }
 
-    monkeypatch.setattr('accloudtant.prices.aws.section_names', {
+    monkeypatch.setattr('accloudtant.aws.prices.section_names', {
         'linux-od.min.js': {
             'key': 'od',
             'kind': 'linux',
@@ -190,7 +190,7 @@ def test_process_generic(monkeypatch):
     instances = None
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
-        generic, instances = accloudtant.prices.aws.process_generic(
+        generic, instances = accloudtant.aws.prices.process_generic(
                 data, js_name, instances)
         assert(generic['version'] == data['vers'])
         if 'rate' in data['config']:
@@ -241,14 +241,14 @@ def test_process_on_demand(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
-        instances = accloudtant.prices.aws.process_on_demand(
+        instances = accloudtant.aws.prices.process_on_demand(
                 data, js_name, instances)
     regions = [region['region'] for region in data_rate['config']['regions']]
     assert('linux' in instances and 'rhel' in instances)
@@ -432,14 +432,14 @@ def test_process_reserved(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
-        instances = accloudtant.prices.aws.process_reserved(
+        instances = accloudtant.aws.prices.process_reserved(
                 data, js_name, instances)
     assert('linux' in instances and 'rhel' in instances)
     regions = [region['region'] for region in data_rate['config']['regions']]
@@ -561,13 +561,13 @@ def test_process_data_transfer(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     js_name = 'pricing-data-transfer-with-regions.min.js'
-    instances = accloudtant.prices.aws.process_data_transfer(
+    instances = accloudtant.aws.prices.process_data_transfer(
             data, js_name, instances)
     assert('data_transfer' in instances)
     regions = [region['region'] for region in data['config']['regions']]
@@ -641,13 +641,13 @@ def test_process_ebs(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     js_name = 'pricing-ebs.min.js'
-    instances = accloudtant.prices.aws.process_ebs(data, js_name, instances)
+    instances = accloudtant.aws.prices.process_ebs(data, js_name, instances)
     assert('ebs' in instances)
     regions = [region['region'] for region in data['config']['regions']]
     for region in regions:
@@ -688,13 +688,13 @@ def test_process_eip(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     js_name = 'pricing-elastic-ips.min.js'
-    instances = accloudtant.prices.aws.process_eip(data, js_name, instances)
+    instances = accloudtant.aws.prices.process_eip(data, js_name, instances)
     assert('eip' in instances)
     regions = [region['region'] for region in data['config']['regions']]
     for region in regions:
@@ -738,13 +738,13 @@ def test_process_cw(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     js_name = 'pricing-cloudwatch.min.js'
-    instances = accloudtant.prices.aws.process_cw(data, js_name, instances)
+    instances = accloudtant.aws.prices.process_cw(data, js_name, instances)
     assert('cw' in instances)
     regions = [region['region'] for region in data['config']['regions']]
     for region in regions:
@@ -776,13 +776,13 @@ def test_process_elb(monkeypatch, mock_process_generic):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_generic',
+        'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
     instances = None
     js_name = 'pricing-elb.min.js'
-    instances = accloudtant.prices.aws.process_elb(data, js_name, instances)
+    instances = accloudtant.aws.prices.process_elb(data, js_name, instances)
     assert('elb' in instances)
     regions = [region['region'] for region in data['config']['regions']]
     for region in regions:
@@ -1069,7 +1069,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
         }
 
     monkeypatch.setattr(
-        'accloudtant.prices.aws.process_ec2',
+        'accloudtant.aws.prices.process_ec2',
         mock_process_ec2
         )
     mock_process_ec2.set_responses(result)
@@ -1077,6 +1077,6 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
     output = """EC2:
 """
 
-    accloudtant.prices.aws.print_prices()
+    accloudtant.aws.prices.print_prices()
     out, err = capsys.readouterr()
     assert(out == output)
