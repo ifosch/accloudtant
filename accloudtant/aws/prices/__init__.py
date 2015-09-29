@@ -1,15 +1,33 @@
 #!/usr/bin/env python
 
+from os import environ
 import io
 import json
 import re
 import warnings
 import requests
+from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
 
 
-def print_prices():
+def print_prices(instances=None):
+    """
+    This function prints the results from the AWS EC2 pricing processing.
+    """
+    region = 'us-east-1'
+    if 'AWS_DEFAULT_REGION' in environ:
+        region = environ['AWS_DEFAULT_REGION']
+    if instances is None:
+        instances = process_ec2()
     print('EC2:')
+    headers = ['Size', 'On Demand']
+    table = []
+    for ec2_kind in ['linux']:
+        for size in sorted(instances[ec2_kind][region].keys()):
+            ondemand = instances[ec2_kind][region][size]['od']
+            row = [size, ondemand]
+            table.append(row)
+    print(tabulate(table, headers))
 
 
 def process_ec2():

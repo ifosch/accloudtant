@@ -15,6 +15,6 @@ setup(
     description='Cloud cost calculation tool',
     long_description=long_description,
     url='https://github.com/ifosch/accloudtant',
-    install_requires=['requests'],
+    install_requires=['requests', 'tabulate'],
     scripts=['bin/accloudtant'],
 )

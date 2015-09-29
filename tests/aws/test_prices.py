@@ -810,14 +810,14 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
                 },
             },
         'cw': {
-            'us-west-1': {
+            'us-east-1': {
                 'ec2Monitoring': '3.50',
                 'cwRequests': '0.01',
                 'cloudWatchLogs': '0.67',
                 'cwMetrics': '0.50',
                 'cwAlarms': '0.10',
                 },
-            'us-gov-west-1': {
+            'eu-west-1': {
                 'ec2Monitoring': '4.55',
                 'cwRequests': '0.013',
                 'cwMetrics': '0.65',
@@ -839,7 +839,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
                 },
             },
         'data_transfer': {
-            'eu-central-1': {
+            'eu-west-1': {
                 'regional': {'prices': {'USD': '0.01', }, },
                 'ELB': {'prices': {'USD': '0.01', }, },
                 'AZ': {'prices': {'USD': '0.00', }, },
@@ -913,7 +913,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
                 },
             },
         'linux': {
-            'eu-west-1': {
+            'us-east-1': {
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
@@ -984,12 +984,12 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
                                 },
                             },
                         },
-                    'od': '0.767',
+                    'od': '0.768',
                     'memoryGiB': '15',
                     'vCPU': '8',
                     },
                 },
-            'ap-southeast-1': {
+            'eu-west-1': {
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
@@ -1075,6 +1075,10 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
     mock_process_ec2.set_responses(result)
 
     output = """EC2:
+Size          On Demand
+----------  -----------
+c3.8xlarge        0.768
+g2.2xlarge        0.767
 """
 
     accloudtant.aws.prices.print_prices()
