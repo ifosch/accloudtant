@@ -1023,7 +1023,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
                                 },
                             },
                         },
-                    'od': '0.767',
+                    'od': '0.787',
                     'memoryGiB': '15',
                     'vCPU': '8',
                     },
@@ -1074,13 +1074,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
         )
     mock_process_ec2.set_responses(result)
 
-    output = """EC2:
-Size          On Demand
-----------  -----------
-c3.8xlarge        0.768
-g2.2xlarge        0.767
-"""
-
     accloudtant.aws.prices.print_prices()
     out, err = capsys.readouterr()
-    assert(out == output)
+    expected = open('tests/aws/print_expected.txt', 'r').read()
+    assert(out == expected)
