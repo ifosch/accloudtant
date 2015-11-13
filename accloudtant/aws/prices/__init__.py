@@ -1,15 +1,40 @@
 #!/usr/bin/env python
 
+from os import environ
 import io
 import json
 import re
 import warnings
 import requests
+from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
 
 
-def print_prices():
-    print('EC2:')
+def print_prices(instances=None):
+    """
+    This function prints the results from the AWS EC2 pricing processing.
+    """
+    region = 'us-east-1'
+    if 'AWS_DEFAULT_REGION' in environ:
+        region = environ['AWS_DEFAULT_REGION']
+    if instances is None:
+        instances = process_ec2()
+    print('EC2 (Hourly prices, no upfronts, no instance type features):')
+    headers = ['Type', 'On Demand', '1y No Upfront', '1y Partial Upfront', '1y All Upfront', '3y Partial Upfront', '3y All Upfront']
+    table = []
+    for ec2_kind in ['linux']:
+        for size in sorted(instances[ec2_kind][region].keys()):
+            on_demand = instances[ec2_kind][region][size]['od']
+            reserved_1yr = instances[ec2_kind][region][size]['ri']['yrTerm1']
+            reserved_3yr = instances[ec2_kind][region][size]['ri']['yrTerm3']
+            no_upfront = reserved_1yr['noUpfront']['effectiveHourly']
+            partial_upfront_1yr = reserved_1yr['partialUpfront']['effectiveHourly']
+            all_upfront_1yr = reserved_1yr['allUpfront']['effectiveHourly']
+            partial_upfront_3yr = reserved_3yr['partialUpfront']['effectiveHourly']
+            all_upfront_3yr = reserved_3yr['allUpfront']['effectiveHourly']
+            row = [size, on_demand, no_upfront, partial_upfront_1yr, all_upfront_1yr, partial_upfront_3yr, all_upfront_3yr]
+            table.append(row)
+    print(tabulate(table, headers))
 
 
 def process_ec2():
