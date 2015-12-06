@@ -20,19 +20,38 @@ def print_prices(instances=None):
     if instances is None:
         instances = process_ec2()
     print('EC2 (Hourly prices, no upfronts, no instance type features):')
-    headers = ['Type', 'On Demand', '1y No Upfront', '1y Partial Upfront', '1y All Upfront', '3y Partial Upfront', '3y All Upfront']
+    headers = [
+            'Type',
+            'On Demand',
+            '1y No Upfront',
+            '1y Partial Upfront',
+            '1y All Upfront',
+            '3y Partial Upfront',
+            '3y All Upfront'
+            ]
     table = []
     for ec2_kind in ['linux']:
         for size in sorted(instances[ec2_kind][region].keys()):
             on_demand = instances[ec2_kind][region][size]['od']
             reserved_1yr = instances[ec2_kind][region][size]['ri']['yrTerm1']
             reserved_3yr = instances[ec2_kind][region][size]['ri']['yrTerm3']
-            no_upfront = reserved_1yr['noUpfront']['effectiveHourly']
-            partial_upfront_1yr = reserved_1yr['partialUpfront']['effectiveHourly']
-            all_upfront_1yr = reserved_1yr['allUpfront']['effectiveHourly']
-            partial_upfront_3yr = reserved_3yr['partialUpfront']['effectiveHourly']
-            all_upfront_3yr = reserved_3yr['allUpfront']['effectiveHourly']
-            row = [size, on_demand, no_upfront, partial_upfront_1yr, all_upfront_1yr, partial_upfront_3yr, all_upfront_3yr]
+            nu = 'noUpfront'
+            pu = 'partialUpfront'
+            au = 'allUpfront'
+            no_upfront = reserved_1yr[nu]['effectiveHourly']
+            partial_upfront_1yr = reserved_1yr[pu]['effectiveHourly']
+            all_upfront_1yr = reserved_1yr[au]['effectiveHourly']
+            partial_upfront_3yr = reserved_3yr[pu]['effectiveHourly']
+            all_upfront_3yr = reserved_3yr[au]['effectiveHourly']
+            row = [
+                    size,
+                    on_demand,
+                    no_upfront,
+                    partial_upfront_1yr,
+                    all_upfront_1yr,
+                    partial_upfront_3yr,
+                    all_upfront_3yr
+                    ]
             table.append(row)
     print(tabulate(table, headers))
 
@@ -64,7 +83,10 @@ def process_model(url, instances=None):
             data = fix_lazy_json(
                     re.sub(r".*callback\((.+)\).*", r"\1", js_line))
             data = json.loads(data)
-    processor = section_names[js_name]['process']
+    if js_name not in section_names:
+        processor = process_not_implemented
+    else:
+        processor = section_names[js_name]['process']
     instances = processor(data, js_name, instances)
     return instances
 
@@ -73,14 +95,22 @@ def process_generic(data, js_name, instances=None):
     """
     Given a JSON with AWS pricing for a section, returns generic parameters.
     """
+    if js_name in section_names:
+        key = section_names[js_name]['key']
+        kind = section_names[js_name]['kind']
+        name = section_names[js_name]['name']
+    else:
+        key = None
+        kind = None
+        name = 'Unknown'
     generic = {
         'version': data['vers'],
         'rate': data['config'].get('rate'),
         'currencies': data['config']['currencies'],
         'regions': len(data['config']['regions']),
-        'key': section_names[js_name]['key'],
-        'kind': section_names[js_name]['kind'],
-        'name': section_names[js_name]['name'],
+        'key': key,
+        'kind': kind,
+        'name': name,
     }
     instances = instances or {generic['kind']: {}, }
     if generic['kind'] not in instances:
