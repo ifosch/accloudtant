@@ -1,9 +1,25 @@
 #!/usr/bin/env python
 import warnings
+import click
 from accloudtant.aws.prices import print_prices
+
+
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+def print():
+    print_prices()
+
+
+@cli.command()
+def report():
+    raise NotImplementedError
 
 if __name__ == '__main__':
     with warnings.catch_warnings(record=True) as w:
-        print_prices()
+        cli()
         for warning in w:
             print(warning.message)
