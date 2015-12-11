@@ -1376,7 +1376,10 @@ def test_prices(capsys, monkeypatch, mock_process_ec2):
     prices = accloudtant.aws.prices.Prices()
     print(accloudtant.aws.prices.print_prices())
     out, err = capsys.readouterr()
+    print(prices)
+    out2, err2 = capsys.readouterr()
 
     assert(prices.prices == result)
     assert("{}\n".format(prices.output) == expected)
     assert(out == expected)
+    assert(out2 == expected)
