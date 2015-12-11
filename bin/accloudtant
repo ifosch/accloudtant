@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import warnings
 import click
 from accloudtant.aws.prices import Prices
 
