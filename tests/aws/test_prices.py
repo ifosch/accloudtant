@@ -1,3 +1,4 @@
+import warnings
 import pytest
 import accloudtant.aws.prices
 
@@ -29,12 +30,18 @@ def mock_requests_get():
 @pytest.fixture
 def mock_process_ec2():
     class MockProcessEC2(object):
-        def set_responses(self, responses=None):
+        def set_responses(self, responses=None, unknown=None):
             if responses is None:
                 responses = {}
+            if unknown is None:
+                unknown = []
             self.responses = responses
+            self.unknown = unknown
 
         def __call__(self):
+            for name in self.unknown:
+                warnings.warn("WARN: Parser not implemented for {}"
+                              .format(name))
             return self.responses
 
         def __init__(self, responses=None):
@@ -1383,3 +1390,296 @@ def test_prices(capsys, monkeypatch, mock_process_ec2):
     assert("{}\n".format(prices.output) == expected)
     assert(out == expected)
     assert(out2 == expected)
+
+
+def test_prices_with_warning(capsys, monkeypatch, mock_process_ec2):
+    result = {
+        'eip': {
+            'eu-ireland': {
+                'perRemapOver100': '0.10',
+                'perRemapFirst100': '0.00',
+                'oneEIP': '0.00',
+                'perNonAttachedPerHour': '0.005',
+                'perAdditionalEIPPerHour': '0.005',
+                },
+            'us-east': {
+                'perRemapOver100': '0.10',
+                'perRemapFirst100': '0.00',
+                'oneEIP': '0.00',
+                'perNonAttachedPerHour': '0.005',
+                'perAdditionalEIPPerHour': '0.005',
+                },
+            },
+        'cw': {
+            'us-east-1': {
+                'ec2Monitoring': '3.50',
+                'cwRequests': '0.01',
+                'cloudWatchLogs': '0.67',
+                'cwMetrics': '0.50',
+                'cwAlarms': '0.10',
+                },
+            'eu-west-1': {
+                'ec2Monitoring': '4.55',
+                'cwRequests': '0.013',
+                'cwMetrics': '0.65',
+                'cwAlarms': '0.0515',
+                },
+            },
+        'ebs': {
+            'eu-ireland': {
+                'ebsSnapsToS3': '0.138',
+                'Amazon EBS General Purpose (SSD) volumes': '0.095',
+                'Amazon EBS Provisioned IOPS (SSD) volumes': '0.055',
+                'Amazon EBS Magnetic volumes': '0.11',
+                },
+            'us-east': {
+                'ebsSnapsToS3': '0.125',
+                'Amazon EBS General Purpose (SSD) volumes': '0.095',
+                'Amazon EBS Provisioned IOPS (SSD) volumes': '0.05',
+                'Amazon EBS Magnetic volumes': '0.10',
+                },
+            },
+        'data_transfer': {
+            'eu-west-1': {
+                'regional': {'prices': {'USD': '0.01', }, },
+                'ELB': {'prices': {'USD': '0.01', }, },
+                'AZ': {'prices': {'USD': '0.00', }, },
+                'dataXferInEC2': {
+                    'anotherRegion': '0.00',
+                    'sameAZprivateIP': '0.00',
+                    'anotherService': '0.00',
+                    'Internet': '0.00',
+                    'crossAZ': '0.01',
+                    'sameAZpublicIP': '0.01',
+                    },
+                'dataXferOutEC2': {
+                    'Amazon CloudFront': '0.00',
+                    'crossRegion': '0.02',
+                    'crossAZOut': '0.01',
+                    'anotherServiceOut': '0.00',
+                    'sameAZpublicIPOut': '0.01',
+                    'sameAZprivateIPOut': '0.00',
+                    },
+                'dataXferOutInternet': {
+                    'next4PBout': 'contactus',
+                    'next40TBout': '0.085',
+                    'next100TBout': '0.070',
+                    'next350TBout': '0.050',
+                    'next05PBout': 'contactus',
+                    'greater5PBout': 'contactus',
+                    'firstGBout': '0.000',
+                    'upTo10TBout': '0.090',
+                    },
+                },
+            'us-east-1': {
+                'regional': {'prices': {'USD': '0.01', }, },
+                'ELB': {'prices': {'USD': '0.01', }, },
+                'AZ': {'prices': {'USD': '0.00', }, },
+                'dataXferInEC2': {
+                    'anotherRegion': '0.00',
+                    'sameAZprivateIP': '0.00',
+                    'anotherService': '0.00',
+                    'Internet': '0.00',
+                    'crossAZ': '0.01',
+                    'sameAZpublicIP': '0.01',
+                    },
+                'dataXferOutEC2': {
+                    'Amazon CloudFront': '0.00',
+                    'crossRegion': '0.02',
+                    'crossAZOut': '0.01',
+                    'anotherServiceOut': '0.00',
+                    'sameAZpublicIPOut': '0.01',
+                    'sameAZprivateIPOut': '0.00',
+                    },
+                'dataXferOutInternet': {
+                    'next4PBout': 'contactus',
+                    'next40TBout': '0.085',
+                    'next100TBout': '0.070',
+                    'next350TBout': '0.050',
+                    'next05PBout': 'contactus',
+                    'greater5PBout': 'contactus',
+                    'firstGBout': '0.000',
+                    'upTo10TBout': '0.090',
+                    },
+                },
+            },
+        'elb': {
+            'eu-ireland': {
+                'perELBHour': '0.0008',
+                'perGBProcessed': '0.028',
+                },
+            'us-east': {
+                'perELBHour': '0.0008',
+                'perGBProcessed': '0.025',
+                },
+            },
+        'linux': {
+            'us-east-1': {
+                'g2.2xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                'c3.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.768',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                },
+            'eu-west-1': {
+                'g2.2xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.787',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                'c3.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                },
+            },
+        }
+    expected = open('tests/aws/print_expected_with_warnings.txt', 'r').read()
+
+    monkeypatch.setattr(
+        'accloudtant.aws.prices.process_ec2',
+        mock_process_ec2
+        )
+    mock_process_ec2.set_responses(result, ['Unknown'])
+
+    prices = accloudtant.aws.prices.Prices()
+    print(prices)
+    out, err = capsys.readouterr()
+
+    assert(prices.prices == result)
+    assert("{}\n".format(prices.output) == expected)
+    assert(out == expected)

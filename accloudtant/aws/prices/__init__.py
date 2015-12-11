@@ -12,8 +12,11 @@ from accloudtant.utils import fix_lazy_json
 
 class Prices(object):
     def __init__(self):
-        self.prices = process_ec2()
-        self.output = print_prices(self.prices)
+        with warnings.catch_warnings(record=True) as w:
+            self.prices = process_ec2()
+            self.output = print_prices(self.prices)
+            for warning in w:
+                self.output += "\n{}".format(warning.message)
 
     def __repr__(self):
         return self.output
