@@ -1,0 +1,6 @@
+EC2 (Hourly prices, no upfronts, no instance type features):
+Type          On Demand    1y No Upfront    1y Partial Upfront    1y All Upfront    3y Partial Upfront    3y All Upfront
+----------  -----------  ---------------  --------------------  ----------------  --------------------  ----------------
+c3.8xlarge        0.768            0.611                0.5121            0.5225                0.4143            0.3894
+g2.2xlarge        0.767            0.611                0.5121            0.5225                0.4143            0.3894
+WARN: Parser not implemented for Unknown
