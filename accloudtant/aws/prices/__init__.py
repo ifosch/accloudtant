@@ -10,6 +10,15 @@ from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
 
 
+class Prices(object):
+    def __init__(self):
+        self.prices = process_ec2()
+        self.output = print_prices(self.prices)
+
+    def __repr__(self):
+        return self.output
+
+
 def print_prices(instances=None):
     """
     This function prints the results from the AWS EC2 pricing processing.
@@ -19,7 +28,6 @@ def print_prices(instances=None):
         region = environ['AWS_DEFAULT_REGION']
     if instances is None:
         instances = process_ec2()
-    print('EC2 (Hourly prices, no upfronts, no instance type features):')
     headers = [
             'Type',
             'On Demand',
@@ -53,7 +61,9 @@ def print_prices(instances=None):
                     all_upfront_3yr
                     ]
             table.append(row)
-    print(tabulate(table, headers))
+    output = "EC2 (Hourly prices, no upfronts, no instance type features):\n"
+    output += tabulate(table, headers)
+    return output
 
 
 def process_ec2():

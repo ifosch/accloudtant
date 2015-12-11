@@ -132,6 +132,7 @@ def test_process_model(monkeypatch, mock_requests_get, mock_processor):
         'http://ec2/linux-od.min.js': 'callback({xxx: "xxx"})',
         'http://ec2/rhel-od.min.js': 'callback({yyy: "yyy"})',
         }
+    result = None
 
     monkeypatch.setattr('requests.get', mock_requests_get)
     mock_requests_get.set_responses(sample_content)
@@ -144,7 +145,6 @@ def test_process_model(monkeypatch, mock_requests_get, mock_processor):
            },
         })
 
-    result = None
     for url in sample_urls:
         result = accloudtant.aws.prices.process_model(url, result)
 
@@ -173,6 +173,7 @@ def test_process_generic(monkeypatch):
         'http://ec2/linux-od.min.js': data_no_rate,
         'http://ec2/rhel-od.min.js': data_rate,
         }
+    instances = None
 
     monkeypatch.setattr('accloudtant.aws.prices.section_names', {
         'linux-od.min.js': {
@@ -187,7 +188,6 @@ def test_process_generic(monkeypatch):
            },
         })
 
-    instances = None
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
         generic, instances = accloudtant.aws.prices.process_generic(
@@ -195,6 +195,7 @@ def test_process_generic(monkeypatch):
         assert(generic['version'] == data['vers'])
         if 'rate' in data['config']:
             assert(generic['rate'] == data['config']['rate'])
+
     assert('linux' in instances and 'rhel' in instances)
 
 
@@ -239,18 +240,19 @@ def test_process_on_demand(monkeypatch, mock_process_generic):
         'http://ec2/linux-od.min.js': data_rate,
         'http://ec2/rhel-od.min.js': data_rate,
         }
+    instances = None
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
         instances = accloudtant.aws.prices.process_on_demand(
                 data, js_name, instances)
     regions = [region['region'] for region in data_rate['config']['regions']]
+
     assert('linux' in instances and 'rhel' in instances)
     for kind in instances:
         assert(region in instances[kind] for region in regions)
@@ -430,19 +432,20 @@ def test_process_reserved(monkeypatch, mock_process_generic):
         'http://ec2/linux-unix-shared.min.js': data_rate,
         'http://ec2/red-hat-enterprise-linux-shared.min.js': data_rate,
         }
+    instances = None
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
     for url, data in sample_content.items():
         js_name = url.split('/')[-1]
         instances = accloudtant.aws.prices.process_reserved(
                 data, js_name, instances)
-    assert('linux' in instances and 'rhel' in instances)
     regions = [region['region'] for region in data_rate['config']['regions']]
+
+    assert('linux' in instances and 'rhel' in instances)
     for kind in instances:
         assert(region in instances[kind] for region in regions)
         for region in instances[kind]:
@@ -559,18 +562,19 @@ def test_process_data_transfer(monkeypatch, mock_process_generic):
                 }, ],
             },
         }
+    instances = None
+    js_name = 'pricing-data-transfer-with-regions.min.js'
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
-    js_name = 'pricing-data-transfer-with-regions.min.js'
     instances = accloudtant.aws.prices.process_data_transfer(
             data, js_name, instances)
-    assert('data_transfer' in instances)
     regions = [region['region'] for region in data['config']['regions']]
+
+    assert('data_transfer' in instances)
     for region in regions:
         region_data = instances['data_transfer'][region]
         assert('dataXferInEC2' in region_data)
@@ -639,17 +643,18 @@ def test_process_ebs(monkeypatch, mock_process_generic):
                 }, ],
             },
         }
+    instances = None
+    js_name = 'pricing-ebs.min.js'
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
-    js_name = 'pricing-ebs.min.js'
     instances = accloudtant.aws.prices.process_ebs(data, js_name, instances)
-    assert('ebs' in instances)
     regions = [region['region'] for region in data['config']['regions']]
+
+    assert('ebs' in instances)
     for region in regions:
         region_data = instances['ebs'][region]
         assert('ebsVols' in region_data)
@@ -686,17 +691,18 @@ def test_process_eip(monkeypatch, mock_process_generic):
                 }, ],
             },
         }
+    instances = None
+    js_name = 'pricing-elastic-ips.min.js'
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
-    js_name = 'pricing-elastic-ips.min.js'
     instances = accloudtant.aws.prices.process_eip(data, js_name, instances)
-    assert('eip' in instances)
     regions = [region['region'] for region in data['config']['regions']]
+
+    assert('eip' in instances)
     for region in regions:
         region_data = instances['eip'][region]
         assert('oneEIP' in region_data)
@@ -736,17 +742,18 @@ def test_process_cw(monkeypatch, mock_process_generic):
                 }, ],
             },
         }
+    instances = None
+    js_name = 'pricing-cloudwatch.min.js'
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
-    js_name = 'pricing-cloudwatch.min.js'
     instances = accloudtant.aws.prices.process_cw(data, js_name, instances)
-    assert('cw' in instances)
     regions = [region['region'] for region in data['config']['regions']]
+
+    assert('cw' in instances)
     for region in regions:
         region_data = instances['cw'][region]
         assert('ec2Monitoring' in region_data)
@@ -774,17 +781,18 @@ def test_process_elb(monkeypatch, mock_process_generic):
                 }, ],
             },
         }
+    instances = None
+    js_name = 'pricing-elb.min.js'
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_generic',
         mock_process_generic
         )
 
-    instances = None
-    js_name = 'pricing-elb.min.js'
     instances = accloudtant.aws.prices.process_elb(data, js_name, instances)
-    assert('elb' in instances)
     regions = [region['region'] for region in data['config']['regions']]
+
+    assert('elb' in instances)
     for region in regions:
         region_data = instances['elb'][region]
         assert('perELBHour' in region_data)
@@ -1067,6 +1075,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
                 },
             },
         }
+    expected = open('tests/aws/print_expected.txt', 'r').read()
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_ec2',
@@ -1074,7 +1083,300 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
         )
     mock_process_ec2.set_responses(result)
 
-    accloudtant.aws.prices.print_prices()
+    print(accloudtant.aws.prices.print_prices())
     out, err = capsys.readouterr()
+
+    assert(out == expected)
+
+
+def test_prices(capsys, monkeypatch, mock_process_ec2):
+    result = {
+        'eip': {
+            'eu-ireland': {
+                'perRemapOver100': '0.10',
+                'perRemapFirst100': '0.00',
+                'oneEIP': '0.00',
+                'perNonAttachedPerHour': '0.005',
+                'perAdditionalEIPPerHour': '0.005',
+                },
+            'us-east': {
+                'perRemapOver100': '0.10',
+                'perRemapFirst100': '0.00',
+                'oneEIP': '0.00',
+                'perNonAttachedPerHour': '0.005',
+                'perAdditionalEIPPerHour': '0.005',
+                },
+            },
+        'cw': {
+            'us-east-1': {
+                'ec2Monitoring': '3.50',
+                'cwRequests': '0.01',
+                'cloudWatchLogs': '0.67',
+                'cwMetrics': '0.50',
+                'cwAlarms': '0.10',
+                },
+            'eu-west-1': {
+                'ec2Monitoring': '4.55',
+                'cwRequests': '0.013',
+                'cwMetrics': '0.65',
+                'cwAlarms': '0.0515',
+                },
+            },
+        'ebs': {
+            'eu-ireland': {
+                'ebsSnapsToS3': '0.138',
+                'Amazon EBS General Purpose (SSD) volumes': '0.095',
+                'Amazon EBS Provisioned IOPS (SSD) volumes': '0.055',
+                'Amazon EBS Magnetic volumes': '0.11',
+                },
+            'us-east': {
+                'ebsSnapsToS3': '0.125',
+                'Amazon EBS General Purpose (SSD) volumes': '0.095',
+                'Amazon EBS Provisioned IOPS (SSD) volumes': '0.05',
+                'Amazon EBS Magnetic volumes': '0.10',
+                },
+            },
+        'data_transfer': {
+            'eu-west-1': {
+                'regional': {'prices': {'USD': '0.01', }, },
+                'ELB': {'prices': {'USD': '0.01', }, },
+                'AZ': {'prices': {'USD': '0.00', }, },
+                'dataXferInEC2': {
+                    'anotherRegion': '0.00',
+                    'sameAZprivateIP': '0.00',
+                    'anotherService': '0.00',
+                    'Internet': '0.00',
+                    'crossAZ': '0.01',
+                    'sameAZpublicIP': '0.01',
+                    },
+                'dataXferOutEC2': {
+                    'Amazon CloudFront': '0.00',
+                    'crossRegion': '0.02',
+                    'crossAZOut': '0.01',
+                    'anotherServiceOut': '0.00',
+                    'sameAZpublicIPOut': '0.01',
+                    'sameAZprivateIPOut': '0.00',
+                    },
+                'dataXferOutInternet': {
+                    'next4PBout': 'contactus',
+                    'next40TBout': '0.085',
+                    'next100TBout': '0.070',
+                    'next350TBout': '0.050',
+                    'next05PBout': 'contactus',
+                    'greater5PBout': 'contactus',
+                    'firstGBout': '0.000',
+                    'upTo10TBout': '0.090',
+                    },
+                },
+            'us-east-1': {
+                'regional': {'prices': {'USD': '0.01', }, },
+                'ELB': {'prices': {'USD': '0.01', }, },
+                'AZ': {'prices': {'USD': '0.00', }, },
+                'dataXferInEC2': {
+                    'anotherRegion': '0.00',
+                    'sameAZprivateIP': '0.00',
+                    'anotherService': '0.00',
+                    'Internet': '0.00',
+                    'crossAZ': '0.01',
+                    'sameAZpublicIP': '0.01',
+                    },
+                'dataXferOutEC2': {
+                    'Amazon CloudFront': '0.00',
+                    'crossRegion': '0.02',
+                    'crossAZOut': '0.01',
+                    'anotherServiceOut': '0.00',
+                    'sameAZpublicIPOut': '0.01',
+                    'sameAZprivateIPOut': '0.00',
+                    },
+                'dataXferOutInternet': {
+                    'next4PBout': 'contactus',
+                    'next40TBout': '0.085',
+                    'next100TBout': '0.070',
+                    'next350TBout': '0.050',
+                    'next05PBout': 'contactus',
+                    'greater5PBout': 'contactus',
+                    'firstGBout': '0.000',
+                    'upTo10TBout': '0.090',
+                    },
+                },
+            },
+        'elb': {
+            'eu-ireland': {
+                'perELBHour': '0.0008',
+                'perGBProcessed': '0.028',
+                },
+            'us-east': {
+                'perELBHour': '0.0008',
+                'perGBProcessed': '0.025',
+                },
+            },
+        'linux': {
+            'us-east-1': {
+                'g2.2xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                'c3.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.768',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                },
+            'eu-west-1': {
+                'g2.2xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.787',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                'c3.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                                },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                                },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                                },
+                            },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                                },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                                },
+                            },
+                        },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                    },
+                },
+            },
+        }
     expected = open('tests/aws/print_expected.txt', 'r').read()
+
+    monkeypatch.setattr(
+        'accloudtant.aws.prices.process_ec2',
+        mock_process_ec2
+        )
+    mock_process_ec2.set_responses(result)
+
+    prices = accloudtant.aws.prices.Prices()
+    print(accloudtant.aws.prices.print_prices())
+    out, err = capsys.readouterr()
+
+    assert(prices.prices == result)
+    assert("{}\n".format(prices.output) == expected)
     assert(out == expected)
