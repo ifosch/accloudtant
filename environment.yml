@@ -1,5 +1,6 @@
 name: accloudtant
 channels:
+- anne
 - natx
 dependencies:
 - boto3=1.1.4=py34_0
