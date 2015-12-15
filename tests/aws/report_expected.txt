@@ -1,0 +1,6 @@
+Id          Name       Type        AZ          OS       State    Launch time
+----------  ---------  ----------  ----------  -------  -------  -------------------
+i-912a4392  web1       c3.8xlarge  us-east-1c  Windows  running  2015-10-22 14:15:10
+i-1840273e  app1       r2.8xlarge  us-east-1b  RHEL     running  2015-10-22 14:15:10
+i-9840273d  app2       r2.8xlarge  us-east-1c  SUSE     stopped  2015-10-22 14:15:10
+i-1840273d  database1  r2.8xlarge  us-east-1c  Linux    stopped  2015-10-22 14:15:10
