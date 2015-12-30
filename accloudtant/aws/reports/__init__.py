@@ -8,6 +8,10 @@ class Reports(object):
         ec2 = boto3.resource('ec2')
         self.instances = list(ec2.instances.all())
         self.set_billing_os()
+        ec2_client = boto3.client('ec2')
+        self.reservations = ec2_client.describe_instances()
+        self.reserved_instances = {}
+        self.get_reservations_info()
 
     def set_billing_os(self):
         self.billing_os = {}
@@ -20,13 +24,11 @@ class Reports(object):
             return ('Windows', 'win')
         else:
             if 'RHEL' in console_output:
-                return ('RHEL', 'rhel')
+                return ('Red Hat Enterprise Linux', 'rhel')
             elif 'SUSE' in console_output:
-                return ('SUSE', 'suse')
-            elif 'Linux' in console_output:
-                return ('Linux', 'linux')
+                return ('SUSE Linux', 'suse')
             else:
-                return ('Unknown', None)
+                return ('Linux/UNIX', 'linux')
 
     def get_name(self, instance):
         names = [tag for tag in instance.tags if tag['Key'] == 'Name']
@@ -34,6 +36,15 @@ class Reports(object):
             return ''
         else:
             return names[0]['Value']
+
+    def get_reservations_info(self):
+        for instance in self.instances:
+            self.reserved_instances[instance.id] = '-'
+            for reservation in self.reservations['Reservations']:
+                reservation_id = reservation['ReservationId']
+                for reserved_instance in reservation['Instances']:
+                    if instance.id == reserved_instance['InstanceId']:
+                        self.reserved_instances[instance.id] = reservation_id
 
     def __repr__(self):
         headers = [
@@ -43,7 +54,8 @@ class Reports(object):
                 'AZ',
                 'OS',
                 'State',
-                'Launch time'
+                'Launch time',
+                'Reservation Id',
                 ]
         table = []
         for instance in self.instances:
@@ -54,7 +66,8 @@ class Reports(object):
                     instance.placement['AvailabilityZone'],
                     self.billing_os[instance.id][0],
                     instance.state['Name'],
-                    instance.launch_time.strftime('%Y-%m-%d %H:%M:%S')
+                    instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
+                    self.reserved_instances[instance.id],
                     ]
             table.append(row)
         return tabulate(table, headers)
