@@ -24,13 +24,11 @@ class Reports(object):
             return ('Windows', 'win')
         else:
             if 'RHEL' in console_output:
-                return ('RHEL', 'rhel')
+                return ('Red Hat Enterprise Linux', 'rhel')
             elif 'SUSE' in console_output:
-                return ('SUSE', 'suse')
-            elif 'Linux' in console_output:
-                return ('Linux', 'linux')
+                return ('SUSE Linux', 'suse')
             else:
-                return ('Unknown', None)
+                return ('Linux/UNIX', 'linux')
 
     def get_name(self, instance):
         names = [tag for tag in instance.tags if tag['Key'] == 'Name']
