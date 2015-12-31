@@ -2,8 +2,8 @@ Id          Name       Type        AZ          OS                        State  
 ----------  ---------  ----------  ----------  ------------------------  -------  -------------------  ----------
 i-912a4392  web1       c3.8xlarge  us-east-1c  Windows                   running  2015-10-22 14:15:10  Yes
 i-1840273e  app1       r2.8xlarge  us-east-1b  Red Hat Enterprise Linux  running  2015-10-22 14:15:10  Yes
-i-9840273d  app2       r2.8xlarge  us-east-1c  SUSE Linux                stopped  2015-10-22 14:15:10  Yes
+i-9840273d  app2       r2.8xlarge  us-east-1c  SUSE Linux                running  2015-10-22 14:15:10  Yes
+i-1840273d  database1  r2.8xlarge  us-east-1c  Linux/UNIX                stopped  2015-10-22 14:15:10  No
 i-1840273c  database2  r2.8xlarge  us-east-1c  Linux/UNIX                running  2015-10-22 14:15:10  Yes
 i-1840273b  database3  r2.8xlarge  us-east-1c  Linux/UNIX                running  2015-10-22 14:15:10  Yes
-i-1840273d  database1  r2.8xlarge  us-east-1c  Linux/UNIX                stopped  2015-10-22 14:15:10  No
 i-912a4393  test       t1.micro    us-east-1c  Linux/UNIX                running  2015-10-22 14:15:10  No

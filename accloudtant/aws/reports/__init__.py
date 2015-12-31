@@ -20,6 +20,7 @@ class Reports(object):
                     if instance.match_reserved_instance(reserved):
                         instance._reserved = True
                         reserved['InstancesLeft'] -= 1
+                        break
 
     def __repr__(self):
         headers = [

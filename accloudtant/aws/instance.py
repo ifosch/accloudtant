@@ -49,6 +49,8 @@ class Instance(object):
                 return ('Linux/UNIX', 'linux')
 
     def match_reserved_instance(self, reserved):
+        if self.state != 'running':
+            return False
         if reserved['State'] != 'active':
             return False
         if reserved['InstancesLeft'] == 0:

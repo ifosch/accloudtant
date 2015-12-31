@@ -62,7 +62,7 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
                 'AvailabilityZone': 'us-east-1c',
             },
             'state': {
-                'Name': 'stopped',
+                'Name': 'running',
             },
             'launch_time': datetime.datetime(
                     2015,
@@ -74,6 +74,29 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
                     tzinfo=tzutc()
                 ),
             'console_output': {'Output': 'SUSE Linux', },
+        }, {
+            'id': 'i-1840273d',
+            'tags': [{
+                'Key': 'Name',
+                'Value': 'database1',
+            }, ],
+            'instance_type': 'r2.8xlarge',
+            'placement': {
+                'AvailabilityZone': 'us-east-1c',
+            },
+            'state': {
+                'Name': 'stopped',
+            },
+            'launch_time': datetime.datetime(
+                    2015,
+                    10,
+                    22,
+                    14,
+                    15,
+                    10,
+                    tzinfo=tzutc()
+                ),
+            'console_output': {'Output': 'Linux', },
         }, {
             'id': 'i-1840273c',
             'tags': [{
@@ -109,29 +132,6 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
             },
             'state': {
                 'Name': 'running',
-            },
-            'launch_time': datetime.datetime(
-                    2015,
-                    10,
-                    22,
-                    14,
-                    15,
-                    10,
-                    tzinfo=tzutc()
-                ),
-            'console_output': {'Output': 'Linux', },
-        }, {
-            'id': 'i-1840273d',
-            'tags': [{
-                'Key': 'Name',
-                'Value': 'database1',
-            }, ],
-            'instance_type': 'r2.8xlarge',
-            'placement': {
-                'AvailabilityZone': 'us-east-1c',
-            },
-            'state': {
-                'Name': 'stopped',
             },
             'launch_time': datetime.datetime(
                     2015,
@@ -304,7 +304,40 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
         }, {
             'ProductDescription': 'Linux/UNIX',
             'InstanceTenancy': 'default',
-            'InstanceCount': 2,
+            'InstanceCount': 1,
+            'InstanceType': 'r2.8xlarge',
+            'Start': datetime.datetime(
+                    2011,
+                    6,
+                    5,
+                    6,
+                    20,
+                    10,
+                    494000,
+                    tzinfo=tzutc()
+                ),
+            'RecurringCharges': [],
+            'End': datetime.datetime(
+                    2011,
+                    6,
+                    5,
+                    6,
+                    20,
+                    10,
+                    tzinfo=tzutc()
+                ),
+            'CurrencyCode': 'USD',
+            'OfferingType': 'Medium Utilization',
+            'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
+            'FixedPrice': 910.0,
+            'AvailabilityZone': 'us-east-1c',
+            'UsagePrice': 0.12,
+            'Duration': 31536000,
+            'State': 'active',
+        }, {
+            'ProductDescription': 'Linux/UNIX',
+            'InstanceTenancy': 'default',
+            'InstanceCount': 1,
             'InstanceType': 'r2.8xlarge',
             'Start': datetime.datetime(
                     2011,
