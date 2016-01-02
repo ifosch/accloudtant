@@ -1,50 +1,26 @@
 #!/usr/bin/env python
 import boto3
 from tabulate import tabulate
+from accloudtant.aws.instance import Instance
 
 
 class Reports(object):
     def __init__(self):
         ec2 = boto3.resource('ec2')
-        self.instances = list(ec2.instances.all())
-        self.set_billing_os()
+        self.instances = [Instance(i) for i in ec2.instances.all()]
         ec2_client = boto3.client('ec2')
-        self.reservations = ec2_client.describe_instances()
-        self.reserved_instances = {}
-        self.get_reservations_info()
+        self.reserved_instances = ec2_client.describe_reserved_instances()
+        self.find_reserved_instance()
 
-    def set_billing_os(self):
-        self.billing_os = {}
+    def find_reserved_instance(self):
         for instance in self.instances:
-            self.billing_os[instance.id] = self.guess_os(instance)
-
-    def guess_os(self, instance):
-        console_output = instance.console_output()['Output']
-        if 'Windows' in console_output:
-            return ('Windows', 'win')
-        else:
-            if 'RHEL' in console_output:
-                return ('Red Hat Enterprise Linux', 'rhel')
-            elif 'SUSE' in console_output:
-                return ('SUSE Linux', 'suse')
-            else:
-                return ('Linux/UNIX', 'linux')
-
-    def get_name(self, instance):
-        names = [tag for tag in instance.tags if tag['Key'] == 'Name']
-        if names is None:
-            return ''
-        else:
-            return names[0]['Value']
-
-    def get_reservations_info(self):
-        for instance in self.instances:
-            self.reserved_instances[instance.id] = '-'
-            for reservation in self.reservations['Reservations']:
-                reservation_id = reservation['ReservationId']
-                for reserved_instance in reservation['Instances']:
-                    if instance.id == reserved_instance['InstanceId']:
-                        self.reserved_instances[instance.id] = reservation_id
+            for reserved in self.reserved_instances['ReservedInstances']:
+                    if 'InstancesLeft' not in reserved.keys():
+                        reserved['InstancesLeft'] = reserved['InstanceCount']
+                    if instance.match_reserved_instance(reserved):
+                        instance._reserved = True
+                        reserved['InstancesLeft'] -= 1
+                        break
 
     def __repr__(self):
         headers = [
@@ -55,19 +31,19 @@ class Reports(object):
                 'OS',
                 'State',
                 'Launch time',
-                'Reservation Id',
+                'Reserved',
                 ]
         table = []
         for instance in self.instances:
             row = [
                     instance.id,
-                    self.get_name(instance),
+                    instance.name,
                     instance.instance_type,
-                    instance.placement['AvailabilityZone'],
-                    self.billing_os[instance.id][0],
-                    instance.state['Name'],
+                    instance.availability_zone,
+                    instance.operating_system,
+                    instance.state,
                     instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
-                    self.reserved_instances[instance.id],
+                    instance.reserved,
                     ]
             table.append(row)
         return tabulate(table, headers)
