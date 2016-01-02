@@ -10,7 +10,7 @@ def cli():
 
 
 @cli.command()
-def print():
+def list():
     click.echo(Prices())
 
 
