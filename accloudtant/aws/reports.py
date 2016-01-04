@@ -2,6 +2,7 @@
 import boto3
 from tabulate import tabulate
 from accloudtant.aws.instance import Instance
+from accloudtant.aws.prices import Prices
 
 
 class Reports(object):
@@ -11,6 +12,7 @@ class Reports(object):
         ec2_client = boto3.client('ec2')
         self.reserved_instances = ec2_client.describe_reserved_instances()
         self.find_reserved_instance()
+        self.prices = Prices()
 
     def find_reserved_instance(self):
         for instance in self.instances:

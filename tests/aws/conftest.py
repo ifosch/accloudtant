@@ -42,7 +42,7 @@ class MockEC2Instance(object):
 
 
 @pytest.fixture(scope="session")
-def mock_ec2_resource():
+def ec2_resource():
     class MockEC2Instances(object):
         def __init__(self, instances):
             self.instances = instances
@@ -71,7 +71,7 @@ def mock_ec2_resource():
 
 
 @pytest.fixture(scope="session")
-def mock_ec2_client():
+def ec2_client():
     class MockEC2Client(object):
         def __init__(self, instances, reserved):
             self.instances = instances
@@ -123,7 +123,7 @@ def mock_requests_get():
 
 
 @pytest.fixture
-def mock_process_ec2():
+def process_ec2():
     class MockProcessEC2(object):
         def set_responses(self, responses=None, unknown=None):
             if responses is None:
