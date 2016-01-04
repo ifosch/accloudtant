@@ -3,7 +3,7 @@ from dateutil.tz import tzutc
 import accloudtant.aws.reports
 
 
-def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
+def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
     instances = {
         'instances': [{
             'id': 'i-912a4392',
@@ -208,7 +208,7 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
             'InstanceCount': 1,
             'InstanceType': 'c3.8xlarge',
             'Start': datetime.datetime(
-                    2011,
+                    2015,
                     6,
                     5,
                     6,
@@ -219,20 +219,21 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
                 ),
             'RecurringCharges': [],
             'End': datetime.datetime(
-                    2011,
+                    2016,
                     6,
                     5,
                     6,
                     20,
                     10,
+                    494000,
                     tzinfo=tzutc()
                 ),
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
-            'FixedPrice': 910.0,
+            'FixedPrice': 4486.0,
             'AvailabilityZone': 'us-east-1c',
-            'UsagePrice': 0.12,
+            'UsagePrice': 0.5121,
             'Duration': 31536000,
             'State': 'active',
         }, {
@@ -241,7 +242,7 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
             'InstanceCount': 1,
             'InstanceType': 'r2.8xlarge',
             'Start': datetime.datetime(
-                    2011,
+                    2015,
                     6,
                     5,
                     6,
@@ -252,21 +253,22 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
                 ),
             'RecurringCharges': [],
             'End': datetime.datetime(
-                    2011,
+                    2016,
                     6,
                     5,
                     6,
                     20,
                     10,
+                    494000,
                     tzinfo=tzutc()
                 ),
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233321',
-            'FixedPrice': 910.0,
+            'FixedPrice': 10234,
             'AvailabilityZone': 'us-east-1b',
-            'UsagePrice': 0.12,
-            'Duration': 31536000,
+            'UsagePrice': 0.3894,
+            'Duration': 94608000,
             'State': 'active',
         }, {
             'ProductDescription': 'SUSE Linux',
@@ -274,7 +276,7 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
             'InstanceCount': 1,
             'InstanceType': 'r2.8xlarge',
             'Start': datetime.datetime(
-                    2011,
+                    2015,
                     6,
                     5,
                     6,
@@ -285,7 +287,7 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
                 ),
             'RecurringCharges': [],
             'End': datetime.datetime(
-                    2011,
+                    2016,
                     6,
                     5,
                     6,
@@ -296,9 +298,42 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233322',
-            'FixedPrice': 910.0,
+            'FixedPrice': 2974.0,
             'AvailabilityZone': 'us-east-1c',
-            'UsagePrice': 0.12,
+            'UsagePrice': 0.5225,
+            'Duration': 31536000,
+            'State': 'active',
+        }, {
+            'ProductDescription': 'Linux/UNIX',
+            'InstanceTenancy': 'default',
+            'InstanceCount': 1,
+            'InstanceType': 'r2.8xlarge',
+            'Start': datetime.datetime(
+                    2015,
+                    6,
+                    5,
+                    6,
+                    20,
+                    10,
+                    494000,
+                    tzinfo=tzutc()
+                ),
+            'RecurringCharges': [],
+            'End': datetime.datetime(
+                    2016,
+                    6,
+                    5,
+                    6,
+                    20,
+                    10,
+                    tzinfo=tzutc()
+                ),
+            'CurrencyCode': 'USD',
+            'OfferingType': 'Medium Utilization',
+            'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
+            'FixedPrice': 5352.36,
+            'AvailabilityZone': 'us-east-1c',
+            'UsagePrice': 0.611,
             'Duration': 31536000,
             'State': 'active',
         }, {
@@ -329,52 +364,227 @@ def test_reports(capsys, monkeypatch, mock_ec2_resource, mock_ec2_client):
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
-            'FixedPrice': 910.0,
+            'FixedPrice': 5352.36,
             'AvailabilityZone': 'us-east-1c',
-            'UsagePrice': 0.12,
-            'Duration': 31536000,
-            'State': 'active',
-        }, {
-            'ProductDescription': 'Linux/UNIX',
-            'InstanceTenancy': 'default',
-            'InstanceCount': 1,
-            'InstanceType': 'r2.8xlarge',
-            'Start': datetime.datetime(
-                    2011,
-                    6,
-                    5,
-                    6,
-                    20,
-                    10,
-                    494000,
-                    tzinfo=tzutc()
-                ),
-            'RecurringCharges': [],
-            'End': datetime.datetime(
-                    2011,
-                    6,
-                    5,
-                    6,
-                    20,
-                    10,
-                    tzinfo=tzutc()
-                ),
-            'CurrencyCode': 'USD',
-            'OfferingType': 'Medium Utilization',
-            'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
-            'FixedPrice': 910.0,
-            'AvailabilityZone': 'us-east-1c',
-            'UsagePrice': 0.12,
+            'UsagePrice': 0.611,
             'Duration': 31536000,
             'State': 'active',
         }, ]
     }
+    prices = {
+        'win': {
+            'us-east-1': {
+                'c3.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                            },
+                            'partialUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                            },
+                            'allUpfront': {
+                                'upfront': '4398.4',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5021',
+                            },
+                        },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                            },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                            },
+                        },
+                    },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                },
+            },
+        },
+        'rhel': {
+            'us-east-1': {
+                'r2.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                            },
+                            'partialUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                            },
+                            'allUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                            },
+                        },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10233.432',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                            },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                            },
+                        },
+                    },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                },
+            },
+        },
+        'suse': {
+            'us-east-1': {
+                'r2.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                            },
+                            'partialUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                            },
+                            'allUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                            },
+                        },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                            },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                            },
+                        },
+                    },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                },
+            },
+        },
+        'linux': {
+            'us-east-1': {
+                't1.micro': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                            },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                            },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                            },
+                        },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                            },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                            },
+                        },
+                    },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                },
+                'r2.8xlarge': {
+                    'storageGB': '60 SSD',
+                    'ri': {
+                        'yrTerm1': {
+                            'noUpfront': {
+                                'upfront': '0',
+                                'monthlyStar': '446.03',
+                                'effectiveHourly': '0.611',
+                            },
+                            'allUpfront': {
+                                'upfront': '2974',
+                                'monthlyStar': '133.59',
+                                'effectiveHourly': '0.5225',
+                            },
+                            'partialUpfront': {
+                                'upfront': '4486',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.5121',
+                            },
+                        },
+                        'yrTerm3': {
+                            'allUpfront': {
+                                'upfront': '10234',
+                                'monthlyStar': '0',
+                                'effectiveHourly': '0.3894',
+                            },
+                            'partialUpfront': {
+                                'upfront': '7077',
+                                'monthlyStar': '105.85',
+                                'effectiveHourly': '0.4143',
+                            },
+                        },
+                    },
+                    'od': '0.767',
+                    'memoryGiB': '15',
+                    'vCPU': '8',
+                },
+            },
+        },
+    }
     expected = open('tests/aws/report_expected.txt', 'r').read()
 
-    monkeypatch.setattr('boto3.resource', mock_ec2_resource)
-    mock_ec2_resource.set_responses(instances)
-    monkeypatch.setattr('boto3.client', mock_ec2_client)
-    mock_ec2_client.set_responses({}, reserved_instances)
+    monkeypatch.setattr('boto3.resource', ec2_resource)
+    ec2_resource.set_responses(instances)
+    monkeypatch.setattr('boto3.client', ec2_client)
+    ec2_client.set_responses({}, reserved_instances)
+    monkeypatch.setattr(
+        'accloudtant.aws.prices.process_ec2',
+        process_ec2
+        )
+    process_ec2.set_responses(prices)
 
     reports = accloudtant.aws.reports.Reports()
     print(reports)

@@ -705,7 +705,7 @@ def test_process_elb(monkeypatch, mock_process_generic):
         assert('perGBProcessed' in region_data)
 
 
-def test_print_prices(capsys, monkeypatch, mock_process_ec2):
+def test_print_prices(capsys, monkeypatch, process_ec2):
     result = {
         'eip': {
             'eu-ireland': {
@@ -985,9 +985,9 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_ec2',
-        mock_process_ec2
+        process_ec2
         )
-    mock_process_ec2.set_responses(result)
+    process_ec2.set_responses(result)
 
     print(accloudtant.aws.prices.print_prices())
     out, err = capsys.readouterr()
@@ -995,7 +995,7 @@ def test_print_prices(capsys, monkeypatch, mock_process_ec2):
     assert(out == expected)
 
 
-def test_prices(capsys, monkeypatch, mock_process_ec2):
+def test_prices(capsys, monkeypatch, process_ec2):
     result = {
         'eip': {
             'eu-ireland': {
@@ -1275,9 +1275,9 @@ def test_prices(capsys, monkeypatch, mock_process_ec2):
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_ec2',
-        mock_process_ec2
+        process_ec2
         )
-    mock_process_ec2.set_responses(result)
+    process_ec2.set_responses(result)
 
     prices = accloudtant.aws.prices.Prices()
     print(accloudtant.aws.prices.print_prices())
@@ -1291,7 +1291,7 @@ def test_prices(capsys, monkeypatch, mock_process_ec2):
     assert(out2 == expected)
 
 
-def test_prices_with_warning(capsys, monkeypatch, mock_process_ec2):
+def test_prices_with_warning(capsys, monkeypatch, process_ec2):
     result = {
         'eip': {
             'eu-ireland': {
@@ -1571,9 +1571,9 @@ def test_prices_with_warning(capsys, monkeypatch, mock_process_ec2):
 
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_ec2',
-        mock_process_ec2
+        process_ec2
         )
-    mock_process_ec2.set_responses(result, ['Unknown'])
+    process_ec2.set_responses(result, ['Unknown'])
 
     prices = accloudtant.aws.prices.Prices()
     print(prices)
