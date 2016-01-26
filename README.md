@@ -1,8 +1,6 @@
-# accloudtant
+# accloudtant [![Build Status](https://travis-ci.org/ifosch/accloudtant.svg)](https://travis-ci.org/ifosch/accloudtant)
 
 It is a AWS cost calculator oriented to ease the life of an administrator by providing easy tools to get the costs of current infrastructure, or cost foresights.
-
-[![Build Status](https://travis-ci.org/ifosch/accloudtant.svg)](https://travis-ci.org/ifosch/accloudtant)
 
 ## Development
 
