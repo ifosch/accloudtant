@@ -133,7 +133,7 @@ def process_ec2():
             self.responses = responses
             self.unknown = unknown
 
-        def __call__(self):
+        def __call__(self, url):
             for name in self.unknown:
                 warnings.warn("WARN: Parser not implemented for {}"
                               .format(name))

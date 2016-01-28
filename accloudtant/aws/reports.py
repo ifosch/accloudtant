@@ -11,16 +11,21 @@ class Reports(object):
         self.instances = [Instance(i) for i in ec2.instances.all()]
         ec2_client = boto3.client('ec2')
         self.reserved_instances = ec2_client.describe_reserved_instances()
-        self.find_reserved_instance()
         self.prices = Prices()
+        self.find_reserved_instance()
 
     def find_reserved_instance(self):
         for instance in self.instances:
+            instance.current = float(self.prices.prices[instance.key][instance.region][instance.size]['od'])
+            if instance.state == 'stopped':
+                instance.current = 0.0
+            instance.best = float(self.prices.prices[instance.key][instance.region][instance.size]['ri']['yrTerm3']['allUpfront']['effectiveHourly'])
             for reserved in self.reserved_instances['ReservedInstances']:
                     if 'InstancesLeft' not in reserved.keys():
                         reserved['InstancesLeft'] = reserved['InstanceCount']
                     if instance.match_reserved_instance(reserved):
                         instance._reserved = True
+                        instance.current = reserved['UsagePrice']
                         reserved['InstancesLeft'] -= 1
                         break
 
@@ -40,7 +45,7 @@ class Reports(object):
             row = [
                     instance.id,
                     instance.name,
-                    instance.instance_type,
+                    instance.size,
                     instance.availability_zone,
                     instance.operating_system,
                     instance.state,

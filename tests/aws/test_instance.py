@@ -6,6 +6,7 @@ from conftest import MockEC2Instance
 
 def test_instance():
     az = 'us-east-1b'
+    region = 'us-east-1'
     instance_data = {
         'id': 'i-1840273e',
         'tags': [{
@@ -37,9 +38,20 @@ def test_instance():
     assert(instance.id == ec2_instance.id)
     assert(instance.reserved == 'No')
     assert(instance.name == ec2_instance.tags[0]['Value'])
+    assert(instance.size == ec2_instance.instance_type)
     assert(instance.availability_zone == az)
+    assert(instance.region == region)
     assert(instance.operating_system == 'Red Hat Enterprise Linux')
+    assert(instance.key == 'rhel')
     assert(instance.state == ec2_instance.state['Name'])
+    assert(instance.current == 0.0)
+    assert(instance.best == 0.0)
+
+    instance.current = 0.392
+    instance.best = 0.293
+
+    assert(instance.current == 0.392)
+    assert(instance.best == 0.293)
 
 
 def test_guess_os():
