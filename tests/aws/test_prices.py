@@ -21,7 +21,7 @@ def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
         )
     mock_process_model.set_responses(sample_content)
 
-    result = accloudtant.aws.prices.process_ec2()
+    result = accloudtant.aws.prices.process_ec2(main_url)
 
     assert(main_url in mock_requests_get.urls)
     for url in sample_urls:
@@ -705,7 +705,7 @@ def test_process_elb(monkeypatch, mock_process_generic):
         assert('perGBProcessed' in region_data)
 
 
-def test_print_prices(capsys, monkeypatch, process_ec2):
+def test_print_prices(capsys):
     result = {
         'eip': {
             'eu-ireland': {
@@ -983,13 +983,7 @@ def test_print_prices(capsys, monkeypatch, process_ec2):
         }
     expected = open('tests/aws/print_expected.txt', 'r').read()
 
-    monkeypatch.setattr(
-        'accloudtant.aws.prices.process_ec2',
-        process_ec2
-        )
-    process_ec2.set_responses(result)
-
-    print(accloudtant.aws.prices.print_prices())
+    print(accloudtant.aws.prices.print_prices(result))
     out, err = capsys.readouterr()
 
     assert(out == expected)
@@ -1280,7 +1274,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
     process_ec2.set_responses(result)
 
     prices = accloudtant.aws.prices.Prices()
-    print(accloudtant.aws.prices.print_prices())
+    print(accloudtant.aws.prices.print_prices(result))
     out, err = capsys.readouterr()
     print(prices)
     out2, err2 = capsys.readouterr()

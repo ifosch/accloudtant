@@ -439,7 +439,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                             'allUpfront': {
                                 'upfront': '10233.432',
                                 'monthlyStar': '0',
-                                'effectiveHourly': '0.3894',
+                                'effectiveHourly': '0.3794',
                             },
                             'partialUpfront': {
                                 'upfront': '7077',
@@ -480,7 +480,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
-                                'effectiveHourly': '0.3894',
+                                'effectiveHourly': '0.3890',
                             },
                             'partialUpfront': {
                                 'upfront': '7077',
@@ -521,7 +521,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
-                                'effectiveHourly': '0.3894',
+                                'effectiveHourly': '0.3892',
                             },
                             'partialUpfront': {
                                 'upfront': '7077',
@@ -558,7 +558,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
-                                'effectiveHourly': '0.3894',
+                                'effectiveHourly': '0.3790',
                             },
                             'partialUpfront': {
                                 'upfront': '7077',
@@ -572,6 +572,36 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                     'vCPU': '8',
                 },
             },
+        },
+    }
+    instances_prices = {
+        'i-912a4392': {
+            'current': 0.5121,
+            'best': 0.3894,
+        },
+        'i-1840273e': {
+            'current': 0.3894,
+            'best': 0.3794,
+        },
+        'i-9840273d': {
+            'current': 0.5225,
+            'best': 0.3890,
+        },
+        'i-1840273d': {
+            'current': 0.0,
+            'best': 0.3790,
+        },
+        'i-1840273c': {
+            'current': 0.611,
+            'best': 0.3790,
+        },
+        'i-1840273b': {
+            'current': 0.611,
+            'best': 0.3790,
+        },
+        'i-912a4393': {
+            'current': 0.767,
+            'best': 0.3892,
         },
     }
     expected = open('tests/aws/report_expected.txt', 'r').read()
@@ -591,6 +621,11 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
     out, err = capsys.readouterr()
 
     for mock in instances['instances']:
-        assert([True for i in reports.instances if i.id == mock['id']])
+        mock['current'] = instances_prices[mock['id']]['current']
+        mock['best'] = instances_prices[mock['id']]['best']
+        for instance in reports.instances:
+            if instance.id == mock['id']:
+                assert(instance.current == mock['current'])
+                assert(instance.best == mock['best'])
     print(out)
     assert(out == expected)

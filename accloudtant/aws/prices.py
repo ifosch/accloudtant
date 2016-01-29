@@ -13,7 +13,7 @@ from accloudtant.utils import fix_lazy_json
 class Prices(object):
     def __init__(self):
         with warnings.catch_warnings(record=True) as w:
-            self.prices = process_ec2()
+            self.prices = process_ec2('http://aws.amazon.com/ec2/pricing/')
             self.output = print_prices(self.prices)
             for warning in w:
                 self.output += "\n{}".format(warning.message)
@@ -29,8 +29,6 @@ def print_prices(instances=None):
     region = 'us-east-1'
     if 'AWS_DEFAULT_REGION' in environ:
         region = environ['AWS_DEFAULT_REGION']
-    if instances is None:
-        instances = process_ec2()
     headers = [
             'Type',
             'On Demand',
@@ -69,12 +67,12 @@ def print_prices(instances=None):
     return output
 
 
-def process_ec2():
+def process_ec2(url):
     """
     This function drives the AWS EC2 pricing processing.
     """
     instances = {}
-    pricings = requests.get('http://aws.amazon.com/ec2/pricing/')
+    pricings = requests.get(url)
     for html_line in io.StringIO(pricings.text):
         if 'model:' in html_line:
             url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())

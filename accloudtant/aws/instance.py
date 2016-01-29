@@ -2,12 +2,32 @@ class Instance(object):
     def __init__(self, obj):
         self.id = obj.id
         self.tags = obj.tags
-        self.instance_type = obj.instance_type
+        self.size = obj.instance_type
         self.launch_time = obj.launch_time
         self._placement = obj.placement
         self._state = obj.state
         self._os = self.guess_os(obj)
         self._reserved = False
+        self._prices = {
+            'current': 0.0,
+            'best': 0.0,
+        }
+
+    @property
+    def current(self):
+        return self._prices['current']
+
+    @current.setter
+    def current(self, value):
+        self._prices['current'] = value
+
+    @property
+    def best(self):
+        return self._prices['best']
+
+    @best.setter
+    def best(self, value):
+        self._prices['best'] = value
 
     @property
     def reserved(self):
@@ -27,6 +47,14 @@ class Instance(object):
     @property
     def availability_zone(self):
         return self._placement['AvailabilityZone']
+
+    @property
+    def region(self):
+        return self._placement['AvailabilityZone'][:-1]
+
+    @property
+    def key(self):
+        return self._os[1]
 
     @property
     def operating_system(self):
@@ -57,7 +85,7 @@ class Instance(object):
             return False
         if reserved['ProductDescription'] != self.operating_system:
             return False
-        if reserved['InstanceType'] != self.instance_type:
+        if reserved['InstanceType'] != self.size:
             return False
         if reserved['AvailabilityZone'] != self.availability_zone:
             return False
