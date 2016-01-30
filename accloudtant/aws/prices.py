@@ -165,6 +165,20 @@ def process_generic(data, js_name, instances=None):
     return generic, instances
 
 
+def process_od_types(types, instances_region, key):
+    for instance_type in types:
+        for size in instance_type.get('sizes', []):
+            size_name = size['size']
+            if size_name not in instances_region:
+                instances_region[size_name] = {}
+            instance_data = instances_region[size_name]
+            instance_data['vCPU'] = size.get('vCPU')
+            instance_data['memoryGiB'] = size.get('memoryGiB')
+            instance_data['storageGB'] = size.get('storageGB')
+            price = size['valueColumns'][0]['prices']['USD']
+            instance_data[key] = price
+
+
 def process_on_demand(data, js_name, instances=None):
     """
     Given the JSON for the On Demand EC2 Instances AWS pricing, it loads
@@ -175,17 +189,9 @@ def process_on_demand(data, js_name, instances=None):
         region = region_data['region']
         if region not in instances[generic['kind']]:
             instances[generic['kind']][region] = {}
-        for instance_type in region_data['instanceTypes']:
-            for size in instance_type.get('sizes', []):
-                size_name = size['size']
-                if size_name not in instances[generic['kind']][region]:
-                    instances[generic['kind']][region][size_name] = {}
-                instance_data = instances[generic['kind']][region][size_name]
-                instance_data['vCPU'] = size.get('vCPU')
-                instance_data['memoryGiB'] = size.get('memoryGiB')
-                instance_data['storageGB'] = size.get('storageGB')
-                price = size['valueColumns'][0]['prices']['USD']
-                instance_data[generic['key']] = price
+        types = region_data['instanceTypes']
+        instances_region = instances[generic['kind']][region]
+        process_od_types(types, instances_region, generic['key'])
     return instances
 
 
