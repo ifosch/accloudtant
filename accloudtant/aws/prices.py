@@ -237,6 +237,17 @@ def process_reserved(data, js_name, instances=None):
     return instances
 
 
+def process_data_xfer_types(types, section):
+    for dt_type in types:
+        type_name = dt_type['name']
+        if type_name not in section:
+            section[type_name] = {}
+        for dt_tier in dt_type['tiers']:
+            price = dt_tier['prices']['USD']
+            if len(price):
+                section[type_name][dt_tier['name']] = price
+
+
 def process_data_transfer(data, js_name, instances=None):
     """
     Given the JSON for the Data Transfer pricing, it loads Data Transfer
@@ -251,14 +262,7 @@ def process_data_transfer(data, js_name, instances=None):
         section['regional'] = region_data['regionalDataTransfer']
         section['ELB'] = region_data['elasticLBDataTransfer']
         section['AZ'] = region_data['azDataTransfer']
-        for dt_type in region_data['types']:
-            type_name = dt_type['name']
-            if type_name not in section:
-                section[type_name] = {}
-            for dt_tier in dt_type['tiers']:
-                price = dt_tier['prices']['USD']
-                if len(price):
-                    section[type_name][dt_tier['name']] = price
+        process_data_xfer_types(region_data['types'], section)
     return instances
 
 
