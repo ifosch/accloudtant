@@ -16,10 +16,13 @@ class Reports(object):
 
     def find_reserved_instance(self):
         for instance in self.instances:
-            instance.current = float(self.prices.prices[instance.key][instance.region][instance.size]['od'])
+            instance_region = self.prices.prices[instance.key][instance.region]
+            instance_size = instance_region[instance.size]
+            instance.current = float(instance_size['od'])
             if instance.state == 'stopped':
                 instance.current = 0.0
-            instance.best = float(self.prices.prices[instance.key][instance.region][instance.size]['ri']['yrTerm3']['allUpfront']['effectiveHourly'])
+            instance_allUpfront = instance_size['ri']['yrTerm3']['allUpfront']
+            instance.best = float(instance_allUpfront['effectiveHourly'])
             for reserved in self.reserved_instances['ReservedInstances']:
                     if 'InstancesLeft' not in reserved.keys():
                         reserved['InstancesLeft'] = reserved['InstanceCount']
@@ -39,6 +42,8 @@ class Reports(object):
                 'State',
                 'Launch time',
                 'Reserved',
+                'Current hourly price',
+                'Renewed hourly price',
                 ]
         table = []
         for instance in self.instances:
@@ -51,6 +56,8 @@ class Reports(object):
                     instance.state,
                     instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
                     instance.reserved,
+                    instance.current,
+                    instance.best,
                     ]
             table.append(row)
         return tabulate(table, headers)
