@@ -18,15 +18,17 @@ class Prices(object):
             self.prices = process_ec2(curr_url)
             prices_prev = process_ec2(prev_url)
             for kind in self.prices:
-                kind_prices = self.prices[kind]
                 if kind in prices_prev:
-                    for region in kind_prices:
-                        region_prices = kind_prices[region]
-                        if region in prices_prev[kind]:
-                            region_prices.update(prices_prev[kind][region])
+                    self.update_region_prices(prices_prev, kind)
             self.output = print_prices(self.prices)
             for warning in w:
                 self.output += "\n{}".format(warning.message)
+
+    def update_region_prices(self, prices_prev, kind):
+        for region in self.prices[kind]:
+            region_prices = self.prices[kind][region]
+            if region in prices_prev[kind]:
+                region_prices.update(prices_prev[kind][region])
 
     def __repr__(self):
         return self.output
