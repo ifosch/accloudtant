@@ -1,7 +1,9 @@
-# accloudtant [![Build Status][CI-Image]][CI-Url]
+# accloudtant [![Build Status][CI-Image]][CI-Url] [![Code Climate][CC-Image]][CC-Url]
 
   [CI-Image]: https://travis-ci.org/ifosch/accloudtant.svg
   [CI-Url]: https://travis-ci.org/ifosch/accloudtant
+  [CC-Image]: https://codeclimate.com/github/ifosch/accloudtant/badges/gpa.svg
+  [CC-Url]: https://codeclimate.com/github/ifosch/accloudtant
 
 It is a AWS cost calculator oriented to ease the life of an administrator by providing easy tools to get the costs of current infrastructure, or cost foresights.
 
