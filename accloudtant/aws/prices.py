@@ -189,6 +189,37 @@ def process_on_demand(data, js_name, instances=None):
     return instances
 
 
+def process_purchase_options(purchase_options, reserved_instances, term_name):
+    for purchase_option in purchase_options:
+        po_name = purchase_option['purchaseOption']
+        prices = {}
+        for value in purchase_option['valueColumns']:
+            prices[value['name']] = value['prices']['USD']
+        reserved_instances[term_name][po_name] = prices
+
+
+def process_terms(terms, instances):
+    for term in terms:
+        name = term['term']
+        purchase_options = term['purchaseOptions']
+        if 'ri' not in instances:
+            instances['ri'] = {}
+        if name not in instances['ri']:
+            instances['ri'][name] = {}
+            ris = instances['ri']
+            process_purchase_options(purchase_options, ris, name)
+
+
+def process_types(types, instances, key):
+    for instance_type in types:
+        size_name = instance_type['type']
+        if size_name not in instances:
+            instances[size_name] = {}
+        instance_data = instances[size_name]
+        instance_data[key] = {}
+        process_terms(instance_type['terms'], instance_data)
+
+
 def process_reserved(data, js_name, instances=None):
     """
     Given the JSON for the Reserved EC2 Instances AWS pricing, it loads
@@ -199,24 +230,10 @@ def process_reserved(data, js_name, instances=None):
         region = region_data['region']
         if region not in instances[generic['kind']]:
             instances[generic['kind']][region] = {}
-        for instance_type in region_data['instanceTypes']:
-            size_name = instance_type['type']
-            if size_name not in instances[generic['kind']][region]:
-                instances[generic['kind']][region][size_name] = {}
-            instance_data = instances[generic['kind']][region][size_name]
-            instance_data[generic['key']] = {}
-            for term in instance_type['terms']:
-                term_name = term['term']
-                if 'ri' not in instance_data:
-                    instance_data['ri'] = {}
-                if term_name not in instance_data['ri']:
-                    instance_data['ri'][term_name] = {}
-                for purchase_option in term['purchaseOptions']:
-                    po_name = purchase_option['purchaseOption']
-                    prices = {}
-                    for value in purchase_option['valueColumns']:
-                        prices[value['name']] = value['prices']['USD']
-                    instance_data['ri'][term_name][po_name] = prices
+        types = region_data['instanceTypes']
+        region_instances = instances[generic['kind']][region]
+        key = generic['key']
+        process_types(types, region_instances, key)
     return instances
 
 
