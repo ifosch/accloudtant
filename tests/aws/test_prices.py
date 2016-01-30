@@ -626,7 +626,8 @@ def test_process_eip(monkeypatch, mock_process_generic):
         mock_process_generic
         )
 
-    instances = accloudtant.aws.prices.process_eip(data, js_name, instances)
+    process_eip = accloudtant.aws.prices.process_eip_elb
+    instances = process_eip(data, js_name, instances)
     regions = [region['region'] for region in data['config']['regions']]
 
     assert('eip' in instances)
@@ -716,7 +717,8 @@ def test_process_elb(monkeypatch, mock_process_generic):
         mock_process_generic
         )
 
-    instances = accloudtant.aws.prices.process_elb(data, js_name, instances)
+    process_elb = accloudtant.aws.prices.process_eip_elb
+    instances = process_elb(data, js_name, instances)
     regions = [region['region'] for region in data['config']['regions']]
 
     assert('elb' in instances)
