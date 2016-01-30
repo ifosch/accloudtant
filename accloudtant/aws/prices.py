@@ -190,6 +190,11 @@ def process_od_types(types, instances_region, key):
             instance_data[key] = price
 
 
+def init_region(instances_kind, region):
+    if region not in instances_kind:
+        instances_kind[region] = {}
+
+
 def process_on_demand(data, js_name, instances=None):
     """
     Given the JSON for the On Demand EC2 Instances AWS pricing, it loads
@@ -198,8 +203,7 @@ def process_on_demand(data, js_name, instances=None):
     generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances[generic['kind']]:
-            instances[generic['kind']][region] = {}
+        init_region(instances[generic['kind']], region)
         types = region_data['instanceTypes']
         instances_region = instances[generic['kind']][region]
         process_od_types(types, instances_region, generic['key'])
@@ -245,8 +249,7 @@ def process_reserved(data, js_name, instances=None):
     generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances[generic['kind']]:
-            instances[generic['kind']][region] = {}
+        init_region(instances[generic['kind']], region)
         types = region_data['instanceTypes']
         region_instances = instances[generic['kind']][region]
         key = generic['key']
@@ -273,14 +276,17 @@ def process_data_transfer(data, js_name, instances=None):
     generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances[generic['kind']]:
-            instances[generic['kind']][region] = {}
+        init_region(instances[generic['kind']], region)
         section = instances[generic['kind']][region]
         section['regional'] = region_data['regionalDataTransfer']
         section['ELB'] = region_data['elasticLBDataTransfer']
         section['AZ'] = region_data['azDataTransfer']
         process_data_xfer_types(region_data['types'], section)
     return instances
+
+
+def set_price(instance_data, name, price):
+    instance_data[name] = price
 
 
 def process_ebs_cw(data, js_name, instances=None):
@@ -295,7 +301,8 @@ def process_ebs_cw(data, js_name, instances=None):
             instances[generic['kind']][region] = {}
         for price_type in region_data['types']:
             price = price_type['values'][0]['prices']['USD']
-            instances[generic['kind']][region][price_type['name']] = price
+            instance_data = instances[generic['kind']][region]
+            set_price(instance_data, price_type['name'], price)
     return instances
 
 
@@ -307,11 +314,11 @@ def process_eip_elb(data, js_name, instances=None):
     generic, instances = process_generic(data, js_name, instances)
     for region_data in data['config']['regions']:
         region = region_data['region']
-        if region not in instances[generic['kind']]:
-            instances[generic['kind']][region] = {}
+        init_region(instances[generic['kind']], region)
         for price_type in region_data['types'][0]['values']:
             price = price_type['prices']['USD']
-            instances[generic['kind']][region][price_type['rate']] = price
+            instance_data = instances[generic['kind']][region]
+            set_price(instance_data, price_type['rate'], price)
     return instances
 
 
