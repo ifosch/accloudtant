@@ -32,6 +32,10 @@ class Prices(object):
         return self.output
 
 
+def eval_price_exists(price):
+    return price or 'N/A'
+
+
 def print_prices(instances=None):
     """
     This function prints the results from the AWS EC2 pricing processing.
@@ -83,11 +87,16 @@ def print_prices(instances=None):
             nu = 'noUpfront'
             pu = 'partialUpfront'
             au = 'allUpfront'
-            no_upfront = rsrvd_1yr[nu]['effectiveHourly'] or 'N/A'
-            partial_upfront_1yr = rsrvd_1yr[pu]['effectiveHourly'] or 'N/A'
-            all_upfront_1yr = rsrvd_1yr[au]['effectiveHourly'] or 'N/A'
-            partial_upfront_3yr = rsrvd_3yr[pu]['effectiveHourly'] or 'N/A'
-            all_upfront_3yr = rsrvd_3yr[au]['effectiveHourly'] or 'N/A'
+            hourly_price = rsrvd_1yr[nu]['effectiveHourly']
+            no_upfront = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_1yr[pu]['effectiveHourly']
+            partial_upfront_1yr = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_1yr[au]['effectiveHourly']
+            all_upfront_1yr = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_3yr[pu]['effectiveHourly']
+            partial_upfront_3yr = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_3yr[au]['effectiveHourly']
+            all_upfront_3yr = eval_price_exists(hourly_price)
             row = [
                     size,
                     on_demand,
