@@ -283,7 +283,7 @@ def process_data_transfer(data, js_name, instances=None):
     return instances
 
 
-def process_ebs(data, js_name, instances=None):
+def process_ebs_cw(data, js_name, instances=None):
     """
     Given the JSON for the EBS pricing, it loads EBS pricing into instances
     dict.
@@ -463,7 +463,7 @@ section_names = {
         'name': 'Amazon Elastic Block Store',
         'key': 'bs',
         'kind': 'ebs',
-        'process': process_ebs,
+        'process': process_ebs_cw,
     },
     'pricing-elastic-ips.min.js': {
         'name': 'Elastic IP Addresses',
@@ -475,7 +475,7 @@ section_names = {
         'name': 'Amazon CloudWatch',
         'key': 'cw',
         'kind': 'cw',
-        'process': process_cw,
+        'process': process_ebs_cw,
     },
     'pricing-elb.min.js': {
         'name': 'Elastic Load Balancing',
