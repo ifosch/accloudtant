@@ -1,2 +1,3 @@
 .*.swp
+.cache
 accloudtant.egg-info/*
