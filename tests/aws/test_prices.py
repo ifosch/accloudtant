@@ -1,32 +1,49 @@
+import copy
 import accloudtant.aws.prices
 
 
-def test_model_ec2(monkeypatch, mock_requests_get, mock_process_model):
+def test_process_ec2(monkeypatch, mock_requests_get, mock_process_model):
     sample_content = {
         'http://a0.aws.com/pricing/1/ec2/linux-od.min.js': {'linux': {}, },
         'http://a0.aws.com/pricing/1/ec2/rhel-od.min.js': {'rhel': {}, },
+        'http://a0.aws.com/pricing/1/ec2/suse-od.min.js': {'suse': {}, },
         }
-    sample_urls = [
+    curr_urls = [
         '//a0.aws.com/pricing/1/ec2/linux-od.min.js',
         '//a0.aws.com/pricing/1/ec2/rhel-od.min.js',
         ]
-    main_reply = "\n".join(["model: '{}'".format(url) for url in sample_urls])
-    main_url = 'http://aws.amazon.com/ec2/pricing/'
+    prev_urls = [
+        '//a0.aws.com/pricing/1/ec2/linux-od.min.js',
+        '//a0.aws.com/pricing/1/ec2/rhel-od.min.js',
+        '//a0.aws.com/pricing/1/ec2/suse-od.min.js',
+        ]
+    curr_reply = "\n".join(["model: '{}'".format(url) for url in curr_urls])
+    curr_url = 'http://aws.amazon.com/ec2/pricing/'
+    prev_reply = "\n".join(["model: '{}'".format(url) for url in prev_urls])
+    prev_url = 'http://aws.amazon.com/ec2/previous-generation/'
 
     monkeypatch.setattr('requests.get', mock_requests_get)
-    mock_requests_get.set_responses({main_url: main_reply, })
+    mock_requests_get.set_responses({
+        curr_url: curr_reply,
+        prev_url: prev_reply,
+        })
     monkeypatch.setattr(
         'accloudtant.aws.prices.process_model',
         mock_process_model
         )
     mock_process_model.set_responses(sample_content)
 
-    result = accloudtant.aws.prices.process_ec2(main_url)
+    result = accloudtant.aws.prices.process_ec2(curr_url)
+    current = copy.deepcopy(result)
+    current.update(accloudtant.aws.prices.process_ec2(prev_url))
 
-    assert(main_url in mock_requests_get.urls)
-    for url in sample_urls:
+    assert(curr_url in mock_requests_get.urls)
+    assert(prev_url in mock_requests_get.urls)
+    for url in curr_urls:
         assert('http:{}'.format(url) in mock_process_model.urls)
-    assert(result == {'linux': {}, 'rhel': {}})
+    for url in prev_urls:
+        assert('http:{}'.format(url) in mock_process_model.urls)
+    assert(current == {'linux': {}, 'rhel': {}, 'suse': {}, })
 
 
 def test_process_model(monkeypatch, mock_requests_get, mock_processor):
