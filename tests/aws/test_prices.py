@@ -578,7 +578,7 @@ def test_process_ebs(monkeypatch, mock_process_generic):
         mock_process_generic
         )
 
-    instances = accloudtant.aws.prices.process_ebs(data, js_name, instances)
+    instances = accloudtant.aws.prices.process_ebs_cw(data, js_name, instances)
     regions = [region['region'] for region in data['config']['regions']]
 
     assert('ebs' in instances)
@@ -677,7 +677,7 @@ def test_process_cw(monkeypatch, mock_process_generic):
         mock_process_generic
         )
 
-    instances = accloudtant.aws.prices.process_cw(data, js_name, instances)
+    instances = accloudtant.aws.prices.process_ebs_cw(data, js_name, instances)
     regions = [region['region'] for region in data['config']['regions']]
 
     assert('cw' in instances)
