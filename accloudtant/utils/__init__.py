@@ -5,6 +5,25 @@ import tokenize
 import token
 
 
+def fix_unquoted(generated_token, token, valid_tokens):
+    if generated_token[1] not in valid_tokens:
+        new_value = u'"%s"' % generated_token[1]
+        new_token = (token.STRING, new_value)
+    return new_token
+
+
+def fix_single_quoted(value):
+    if value.startswith("'"):
+        value = u'"%s"' % value[1:-1].replace('"', '\\"')
+    return value
+
+
+def remove_invalid_commas(result):
+    if (len(result) > 0) and (result[-1][1] == ','):
+        result.pop()
+    return result
+
+
 def fix_lazy_json(in_text):
     """
     This function modifies JS-contained JSON to be valid.
@@ -19,24 +38,16 @@ def fix_lazy_json(in_text):
     for tokid, tokval, _, _, _ in tokengen:
         # fix unquoted strings
         if (tokid == token.NAME):
-            if tokval not in valid_tokens:
-                tokid = token.STRING
-                tokval = u'"%s"' % tokval
+            tokid, tokval = fix_unquoted((tokid, tokval), token, valid_tokens)
 
         # fix single-quoted strings
         elif (tokid == token.STRING):
-            if tokval.startswith("'"):
-                tokval = u'"%s"' % tokval[1:-1].replace('"', '\\"')
+            tokval = fix_single_quoted(tokval)
 
         # remove invalid commas
         elif (tokid == token.OP) and ((tokval == '}') or (tokval == ']')):
-            if (len(result) > 0) and (result[-1][1] == ','):
-                result.pop()
+            result = remove_invalid_commas(result)
 
-        # fix single-quoted strings
-        elif (tokid == token.STRING):
-            if tokval.startswith("'"):
-                tokval = u'"%s"' % tokval[1:-1].replace('"', '\\"')
         result.append((tokid, tokval))
 
     return tokenize.untokenize(result)
