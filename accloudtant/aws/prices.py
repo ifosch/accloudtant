@@ -4,8 +4,8 @@ from os import environ
 import io
 import json
 import re
-import warnings
 import requests
+import warnings
 from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
 
@@ -13,7 +13,17 @@ from accloudtant.utils import fix_lazy_json
 class Prices(object):
     def __init__(self):
         with warnings.catch_warnings(record=True) as w:
-            self.prices = process_ec2('http://aws.amazon.com/ec2/pricing/')
+            curr_url = 'http://aws.amazon.com/ec2/pricing/'
+            prev_url = 'http://aws.amazon.com/ec2/previous-generation/'
+            self.prices = process_ec2(curr_url)
+            prices_prev = process_ec2(prev_url)
+            for kind in self.prices:
+                kind_prices = self.prices[kind]
+                if kind in prices_prev:
+                    for region in kind_prices:
+                        region_prices = kind_prices[region]
+                        if region in prices_prev[kind]:
+                            region_prices.update(prices_prev[kind][region])
             self.output = print_prices(self.prices)
             for warning in w:
                 self.output += "\n{}".format(warning.message)
@@ -29,6 +39,30 @@ def print_prices(instances=None):
     region = 'us-east-1'
     if 'AWS_DEFAULT_REGION' in environ:
         region = environ['AWS_DEFAULT_REGION']
+    empty_ri = {
+            'yrTerm1': {
+                'noUpfront': {
+                    'effectiveHourly': None,
+                },
+                'partialUpfront': {
+                    'effectiveHourly': None,
+                },
+                'allUpfront': {
+                    'effectiveHourly': None,
+                },
+            },
+            'yrTerm3': {
+                'noUpfront': {
+                    'effectiveHourly': None,
+                },
+                'partialUpfront': {
+                    'effectiveHourly': None,
+                },
+                'allUpfront': {
+                    'effectiveHourly': None,
+                },
+            },
+        }
     headers = [
             'Type',
             'On Demand',
@@ -41,17 +75,19 @@ def print_prices(instances=None):
     table = []
     for ec2_kind in ['linux']:
         for size in sorted(instances[ec2_kind][region].keys()):
-            on_demand = instances[ec2_kind][region][size]['od']
-            reserved_1yr = instances[ec2_kind][region][size]['ri']['yrTerm1']
-            reserved_3yr = instances[ec2_kind][region][size]['ri']['yrTerm3']
+            instance_size = instances[ec2_kind][region][size]
+            on_demand = instance_size['od']
+            reserved_prices = instance_size.get('ri', empty_ri)
+            rsrvd_1yr = reserved_prices['yrTerm1']
+            rsrvd_3yr = reserved_prices['yrTerm3']
             nu = 'noUpfront'
             pu = 'partialUpfront'
             au = 'allUpfront'
-            no_upfront = reserved_1yr[nu]['effectiveHourly']
-            partial_upfront_1yr = reserved_1yr[pu]['effectiveHourly']
-            all_upfront_1yr = reserved_1yr[au]['effectiveHourly']
-            partial_upfront_3yr = reserved_3yr[pu]['effectiveHourly']
-            all_upfront_3yr = reserved_3yr[au]['effectiveHourly']
+            no_upfront = rsrvd_1yr[nu]['effectiveHourly'] or 'N/A'
+            partial_upfront_1yr = rsrvd_1yr[pu]['effectiveHourly'] or 'N/A'
+            all_upfront_1yr = rsrvd_1yr[au]['effectiveHourly'] or 'N/A'
+            partial_upfront_3yr = rsrvd_3yr[pu]['effectiveHourly'] or 'N/A'
+            all_upfront_3yr = rsrvd_3yr[au]['effectiveHourly'] or 'N/A'
             row = [
                     size,
                     on_demand,
