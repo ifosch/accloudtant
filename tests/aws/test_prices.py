@@ -188,6 +188,28 @@ def test_process_on_demand(monkeypatch, mock_process_generic):
             assert(instance_size['od'] == '0.01')
 
 
+def check_reserved_regions(instance_kinds):
+        for region in instance_kinds:
+            assert('t2.micro' in instance_kinds[region])
+            instance_size = instance_kinds[region]['t2.micro']
+            assert('ri' in instance_size)
+            instance_reserved = instance_size['ri']
+            terms = ['yrTerm1', 'yrTerm3']
+            assert(term in instance_reserved for term in terms)
+            for term in terms:
+                for purchase_opt in ['partialUpfront', 'allUpfront']:
+                    assert(purchase_opt in instance_reserved[term])
+                    purchase_parts = instance_reserved[term][purchase_opt]
+                    assert('upfront' in purchase_parts)
+                    assert('monthlyStar' in purchase_parts)
+                    assert('effectiveHourly' in purchase_parts)
+            assert('noUpfront' in instance_reserved['yrTerm1'])
+            no_upfront = instance_reserved['yrTerm1']['noUpfront']
+            assert(no_upfront['upfront'] == '0')
+            assert(no_upfront['monthlyStar'] == '6.57')
+            assert(no_upfront['effectiveHourly'] == '0.009')
+
+
 def test_process_reserved(monkeypatch, mock_process_generic):
     data_rate = {
         'vers': "0.1",
@@ -371,25 +393,7 @@ def test_process_reserved(monkeypatch, mock_process_generic):
     assert('linux' in instances and 'rhel' in instances)
     for kind in instances:
         assert(region in instances[kind] for region in regions)
-        for region in instances[kind]:
-            assert('t2.micro' in instances[kind][region])
-            instance_size = instances[kind][region]['t2.micro']
-            assert('ri' in instance_size)
-            instance_reserved = instance_size['ri']
-            terms = ['yrTerm1', 'yrTerm3']
-            assert(term in instance_reserved for term in terms)
-            for term in terms:
-                for purchase_opt in ['partialUpfront', 'allUpfront']:
-                    assert(purchase_opt in instance_reserved[term])
-                    purchase_parts = instance_reserved[term][purchase_opt]
-                    assert('upfront' in purchase_parts)
-                    assert('monthlyStar' in purchase_parts)
-                    assert('effectiveHourly' in purchase_parts)
-            assert('noUpfront' in instance_reserved['yrTerm1'])
-            no_upfront = instance_reserved['yrTerm1']['noUpfront']
-            assert(no_upfront['upfront'] == '0')
-            assert(no_upfront['monthlyStar'] == '6.57')
-            assert(no_upfront['effectiveHourly'] == '0.009')
+        check_reserved_regions(instances[kind])
 
 
 def test_process_data_transfer(monkeypatch, mock_process_generic):
