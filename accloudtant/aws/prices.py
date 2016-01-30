@@ -293,13 +293,13 @@ def process_ebs_cw(data, js_name, instances=None):
         region = region_data['region']
         if region not in instances[generic['kind']]:
             instances[generic['kind']][region] = {}
-        for ebs_type in region_data['types']:
-            price = ebs_type['values'][0]['prices']['USD']
-            instances[generic['kind']][region][ebs_type['name']] = price
+        for price_type in region_data['types']:
+            price = price_type['values'][0]['prices']['USD']
+            instances[generic['kind']][region][price_type['name']] = price
     return instances
 
 
-def process_eip(data, js_name, instances=None):
+def process_eip_elb(data, js_name, instances=None):
     """
     Given the JSON for the EIP pricing, it loads EIP pricing into instances
     dict.
@@ -309,41 +309,9 @@ def process_eip(data, js_name, instances=None):
         region = region_data['region']
         if region not in instances[generic['kind']]:
             instances[generic['kind']][region] = {}
-        for eip_type in region_data['types'][0]['values']:
-            price = eip_type['prices']['USD']
-            instances[generic['kind']][region][eip_type['rate']] = price
-    return instances
-
-
-def process_cw(data, js_name, instances=None):
-    """
-    Given the JSON for the CloudWatch pricing, it loads CloudWatch pricing
-    into instances dict.
-    """
-    generic, instances = process_generic(data, js_name, instances)
-    for region_data in data['config']['regions']:
-        region = region_data['region']
-        if region not in instances[generic['kind']]:
-            instances[generic['kind']][region] = {}
-        for cw_type in region_data['types']:
-            price = cw_type['values'][0]['prices']['USD']
-            instances[generic['kind']][region][cw_type['name']] = price
-    return instances
-
-
-def process_elb(data, js_name, instances=None):
-    """
-    Given the JSON for the ELB pricing, it loads ELB pricing into instances
-    dict.
-    """
-    generic, instances = process_generic(data, js_name, instances)
-    for region_data in data['config']['regions']:
-        region = region_data['region']
-        if region not in instances[generic['kind']]:
-            instances[generic['kind']][region] = {}
-        for elb_type in region_data['types'][0]['values']:
-            price = elb_type['prices']['USD']
-            instances[generic['kind']][region][elb_type['rate']] = price
+        for price_type in region_data['types'][0]['values']:
+            price = price_type['prices']['USD']
+            instances[generic['kind']][region][price_type['rate']] = price
     return instances
 
 
@@ -469,7 +437,7 @@ section_names = {
         'name': 'Elastic IP Addresses',
         'key': 'ei',
         'kind': 'eip',
-        'process': process_eip,
+        'process': process_eip_elb,
     },
     'pricing-cloudwatch.min.js': {
         'name': 'Amazon CloudWatch',
@@ -481,6 +449,6 @@ section_names = {
         'name': 'Elastic Load Balancing',
         'key': 'lb',
         'kind': 'elb',
-        'process': process_elb,
+        'process': process_eip_elb,
     },
 }
