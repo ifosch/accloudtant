@@ -74,17 +74,12 @@ class Instance(object):
         return self._state['Name']
 
     def match_reserved_instance(self, reserved):
-        if self.state != 'running':
-            return False
-        if reserved['State'] != 'active':
-            return False
-        if reserved['InstancesLeft'] == 0:
-            return False
-        if reserved['ProductDescription'] != self.operating_system:
-            return False
-        if reserved['InstanceType'] != self.size:
-            return False
-        if reserved['AvailabilityZone'] != self.availability_zone:
+        if any((self.state != 'running',
+                reserved['State'] != 'active',
+                reserved['InstancesLeft'] == 0,
+                reserved['ProductDescription'] != self.operating_system,
+                reserved['InstanceType'] != self.size,
+                reserved['AvailabilityZone'] != self.availability_zone)):
             return False
         return True
 
