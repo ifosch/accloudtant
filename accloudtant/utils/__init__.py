@@ -18,7 +18,7 @@ import tokenize
 import token
 
 
-def fix_unquoted(generated_token, token, valid_tokens):
+def fix_unquoted(generated_token, valid_tokens):
     if generated_token[1] not in valid_tokens:
         new_value = u'"%s"' % generated_token[1]
         new_token = (token.STRING, new_value)
