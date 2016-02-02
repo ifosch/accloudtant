@@ -20,7 +20,7 @@ class Instance(object):
         self.launch_time = obj.launch_time
         self._placement = obj.placement
         self._state = obj.state
-        self._os = self.guess_os(obj)
+        self._os = guess_os(obj)
         self._reserved = False
         self._prices = {
             'current': 0.0,
@@ -78,18 +78,6 @@ class Instance(object):
     def state(self):
         return self._state['Name']
 
-    def guess_os(self, instance):
-        console_output = instance.console_output()['Output']
-        if 'Windows' in console_output:
-            return ('Windows', 'win')
-        else:
-            if 'RHEL' in console_output:
-                return ('Red Hat Enterprise Linux', 'rhel')
-            elif 'SUSE' in console_output:
-                return ('SUSE Linux', 'suse')
-            else:
-                return ('Linux/UNIX', 'linux')
-
     def match_reserved_instance(self, reserved):
         if self.state != 'running':
             return False
@@ -104,3 +92,16 @@ class Instance(object):
         if reserved['AvailabilityZone'] != self.availability_zone:
             return False
         return True
+
+
+def guess_os(instance):
+    console_output = instance.console_output()['Output']
+    if 'Windows' in console_output:
+        return ('Windows', 'win')
+    else:
+        if 'RHEL' in console_output:
+            return ('Red Hat Enterprise Linux', 'rhel')
+        elif 'SUSE' in console_output:
+            return ('SUSE Linux', 'suse')
+        else:
+            return ('Linux/UNIX', 'linux')
