@@ -50,11 +50,11 @@ def fix_lazy_json(in_text):
     result = []
     for tokid, tokval, _, _, _ in tokengen:
         # fix unquoted strings
-        if (tokid == token.NAME):
-            tokid, tokval = fix_unquoted((tokid, tokval), token, valid_tokens)
+        if tokid == token.NAME:
+            tokid, tokval = fix_unquoted((tokid, tokval), valid_tokens)
 
         # fix single-quoted strings
-        elif (tokid == token.STRING):
+        elif tokid == token.STRING:
             tokval = fix_single_quoted(tokval)
 
         # remove invalid commas
