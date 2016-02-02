@@ -6,7 +6,7 @@ class Instance(object):
         self.launch_time = obj.launch_time
         self._placement = obj.placement
         self._state = obj.state
-        self._os = self.guess_os(obj)
+        self._os = guess_os(obj)
         self._reserved = False
         self._prices = {
             'current': 0.0,
@@ -36,6 +36,15 @@ class Instance(object):
         else:
             return 'No'
 
+    @reserved.setter
+    def reserved(self, value):
+        if value == 'Yes':
+            self._reserved = True
+        elif value == 'No':
+            self._reserved = False
+        else:
+            raise ValueError
+
     @property
     def name(self):
         names = [tag for tag in self.tags if tag['Key'] == 'Name']
@@ -64,29 +73,25 @@ class Instance(object):
     def state(self):
         return self._state['Name']
 
-    def guess_os(self, instance):
-        console_output = instance.console_output()['Output']
-        if 'Windows' in console_output:
-            return ('Windows', 'win')
-        else:
-            if 'RHEL' in console_output:
-                return ('Red Hat Enterprise Linux', 'rhel')
-            elif 'SUSE' in console_output:
-                return ('SUSE Linux', 'suse')
-            else:
-                return ('Linux/UNIX', 'linux')
-
     def match_reserved_instance(self, reserved):
-        if self.state != 'running':
-            return False
-        if reserved['State'] != 'active':
-            return False
-        if reserved['InstancesLeft'] == 0:
-            return False
-        if reserved['ProductDescription'] != self.operating_system:
-            return False
-        if reserved['InstanceType'] != self.size:
-            return False
-        if reserved['AvailabilityZone'] != self.availability_zone:
+        if any((self.state != 'running',
+                reserved['State'] != 'active',
+                reserved['InstancesLeft'] == 0,
+                reserved['ProductDescription'] != self.operating_system,
+                reserved['InstanceType'] != self.size,
+                reserved['AvailabilityZone'] != self.availability_zone)):
             return False
         return True
+
+
+def guess_os(instance):
+    console_output = instance.console_output()['Output']
+    if 'Windows' in console_output:
+        return ('Windows', 'win')
+    else:
+        if 'RHEL' in console_output:
+            return ('Red Hat Enterprise Linux', 'rhel')
+        elif 'SUSE' in console_output:
+            return ('SUSE Linux', 'suse')
+        else:
+            return ('Linux/UNIX', 'linux')

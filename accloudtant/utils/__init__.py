@@ -5,7 +5,7 @@ import tokenize
 import token
 
 
-def fix_unquoted(generated_token, token, valid_tokens):
+def fix_unquoted(generated_token, valid_tokens):
     if generated_token[1] not in valid_tokens:
         new_value = u'"%s"' % generated_token[1]
         new_token = (token.STRING, new_value)
@@ -37,11 +37,11 @@ def fix_lazy_json(in_text):
     result = []
     for tokid, tokval, _, _, _ in tokengen:
         # fix unquoted strings
-        if (tokid == token.NAME):
-            tokid, tokval = fix_unquoted((tokid, tokval), token, valid_tokens)
+        if tokid == token.NAME:
+            tokid, tokval = fix_unquoted((tokid, tokval), valid_tokens)
 
         # fix single-quoted strings
-        elif (tokid == token.STRING):
+        elif tokid == token.STRING:
             tokval = fix_single_quoted(tokval)
 
         # remove invalid commas
