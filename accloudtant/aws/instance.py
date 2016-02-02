@@ -36,6 +36,15 @@ class Instance(object):
         else:
             return 'No'
 
+    @reserved.setter
+    def reserved(self, value):
+        if value == 'Yes':
+            self._reserved = True
+        elif value == 'No':
+            self._reserved = False
+        else:
+            raise ValueError
+
     @property
     def name(self):
         names = [tag for tag in self.tags if tag['Key'] == 'Name']

@@ -1,4 +1,5 @@
 import datetime
+import pytest
 from dateutil.tz import tzutc
 import accloudtant.aws.instance
 from conftest import MockEC2Instance
@@ -32,6 +33,7 @@ def test_instance():
         'console_output': {'Output': 'RHEL Linux', },
     }
 
+
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)
 
@@ -46,6 +48,9 @@ def test_instance():
     assert(instance.state == ec2_instance.state['Name'])
     assert(instance.current == 0.0)
     assert(instance.best == 0.0)
+
+    with pytest.raises(ValueError):
+        instance.reserved = 'Maybe'
 
     instance.current = 0.392
     instance.best = 0.293
