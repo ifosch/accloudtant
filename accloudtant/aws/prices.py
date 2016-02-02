@@ -4,15 +4,15 @@ from os import environ
 import io
 import json
 import re
-import requests
 import warnings
+import requests
 from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
 
 
 class Prices(object):
     def __init__(self):
-        with warnings.catch_warnings(record=True) as w:
+        with warnings.catch_warnings(record=True) as price_warnings:
             curr_url = 'http://aws.amazon.com/ec2/pricing/'
             prev_url = 'http://aws.amazon.com/ec2/previous-generation/'
             self.prices = process_ec2(curr_url)
@@ -21,7 +21,7 @@ class Prices(object):
                 if kind in prices_prev:
                     self.update_region_prices(prices_prev, kind)
             self.output = print_prices(self.prices)
-            for warning in w:
+            for warning in price_warnings:
                 self.output += "\n{}".format(warning.message)
 
     def update_region_prices(self, prices_prev, kind):
@@ -38,46 +38,42 @@ def eval_price_exists(price):
     return price or 'N/A'
 
 
-def print_prices(instances=None):
-    """
-    This function prints the results from the AWS EC2 pricing processing.
-    """
-    region = 'us-east-1'
+def print_prices(instances=None, region='us-east-1'):
+    """ This function prints the results from the AWS EC2 pricing
+        processing."""
     if 'AWS_DEFAULT_REGION' in environ:
         region = environ['AWS_DEFAULT_REGION']
     empty_ri = {
-            'yrTerm1': {
-                'noUpfront': {
-                    'effectiveHourly': None,
-                },
-                'partialUpfront': {
-                    'effectiveHourly': None,
-                },
-                'allUpfront': {
-                    'effectiveHourly': None,
-                },
+        'yrTerm1': {
+            'noUpfront': {
+                'effectiveHourly': None,
             },
-            'yrTerm3': {
-                'noUpfront': {
-                    'effectiveHourly': None,
-                },
-                'partialUpfront': {
-                    'effectiveHourly': None,
-                },
-                'allUpfront': {
-                    'effectiveHourly': None,
-                },
+            'partialUpfront': {
+                'effectiveHourly': None,
             },
-        }
-    headers = [
-            'Type',
-            'On Demand',
-            '1y No Upfront',
-            '1y Partial Upfront',
-            '1y All Upfront',
-            '3y Partial Upfront',
-            '3y All Upfront'
-            ]
+            'allUpfront': {
+                'effectiveHourly': None,
+            },
+        },
+        'yrTerm3': {
+            'noUpfront': {
+                'effectiveHourly': None,
+            },
+            'partialUpfront': {
+                'effectiveHourly': None,
+            },
+            'allUpfront': {
+                'effectiveHourly': None,
+            },
+        },
+    }
+    headers = ['Type',
+               'On Demand',
+               '1y No Upfront',
+               '1y Partial Upfront',
+               '1y All Upfront',
+               '3y Partial Upfront',
+               '3y All Upfront']
     table = []
     for ec2_kind in ['linux']:
         for size in sorted(instances[ec2_kind][region].keys()):
@@ -86,28 +82,26 @@ def print_prices(instances=None):
             reserved_prices = instance_size.get('ri', empty_ri)
             rsrvd_1yr = reserved_prices['yrTerm1']
             rsrvd_3yr = reserved_prices['yrTerm3']
-            nu = 'noUpfront'
-            pu = 'partialUpfront'
-            au = 'allUpfront'
-            hourly_price = rsrvd_1yr[nu]['effectiveHourly']
+            no_upfront = 'noUpfront'
+            partial_upfront = 'partialUpfront'
+            all_upfront = 'allUpfront'
+            hourly_price = rsrvd_1yr[no_upfront]['effectiveHourly']
             no_upfront = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_1yr[pu]['effectiveHourly']
+            hourly_price = rsrvd_1yr[partial_upfront]['effectiveHourly']
             partial_upfront_1yr = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_1yr[au]['effectiveHourly']
+            hourly_price = rsrvd_1yr[all_upfront]['effectiveHourly']
             all_upfront_1yr = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_3yr[pu]['effectiveHourly']
+            hourly_price = rsrvd_3yr[partial_upfront]['effectiveHourly']
             partial_upfront_3yr = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_3yr[au]['effectiveHourly']
+            hourly_price = rsrvd_3yr[all_upfront]['effectiveHourly']
             all_upfront_3yr = eval_price_exists(hourly_price)
-            row = [
-                    size,
-                    on_demand,
-                    no_upfront,
-                    partial_upfront_1yr,
-                    all_upfront_1yr,
-                    partial_upfront_3yr,
-                    all_upfront_3yr
-                    ]
+            row = [size,
+                   on_demand,
+                   no_upfront,
+                   partial_upfront_1yr,
+                   all_upfront_1yr,
+                   partial_upfront_3yr,
+                   all_upfront_3yr]
             table.append(row)
     output = "EC2 (Hourly prices, no upfronts, no instance type features):\n"
     output += tabulate(table, headers)
@@ -130,7 +124,7 @@ def process_ec2(url):
 def process_model(url, instances=None):
     """
     Given the URL of a AWS JS pricing table generator, invokes the
-    corresponding processing function according to section_names.
+    corresponding processing function according to SECTION_NAMES.
     """
     if instances is None:
         instances = {}
@@ -138,13 +132,13 @@ def process_model(url, instances=None):
     pricing = requests.get(url)
     for js_line in io.StringIO(pricing.text.replace("\n", "")):
         if 'callback' in js_line:
-            data = fix_lazy_json(
-                    re.sub(r".*callback\((.+)\).*", r"\1", js_line))
+            data = fix_lazy_json(re.sub(r".*callback\((.+)\).*",
+                                        r"\1", js_line))
             data = json.loads(data)
-    if js_name not in section_names:
+    if js_name not in SECTION_NAMES:
         processor = process_not_implemented
     else:
-        processor = section_names[js_name]['process']
+        processor = SECTION_NAMES[js_name]['process']
     instances = processor(data, js_name, instances)
     return instances
 
@@ -153,10 +147,10 @@ def process_generic(data, js_name, instances=None):
     """
     Given a JSON with AWS pricing for a section, returns generic parameters.
     """
-    if js_name in section_names:
-        key = section_names[js_name]['key']
-        kind = section_names[js_name]['kind']
-        name = section_names[js_name]['name']
+    if js_name in SECTION_NAMES:
+        key = SECTION_NAMES[js_name]['key']
+        kind = SECTION_NAMES[js_name]['kind']
+        name = SECTION_NAMES[js_name]['name']
     else:
         key = None
         kind = None
@@ -331,7 +325,7 @@ def process_not_implemented(data, js_name, instances=None):
         generic['name']))
     return instances
 
-section_names = {
+SECTION_NAMES = {
     'linux-od.min.js': {
         'name': 'On Demand - Linux',
         'key': 'od',

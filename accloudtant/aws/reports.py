@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import boto3
 from tabulate import tabulate
 from accloudtant.aws.instance import Instance
@@ -21,43 +22,39 @@ class Reports(object):
             instance.current = float(instance_size['od'])
             if instance.state == 'stopped':
                 instance.current = 0.0
-            instance_allUpfront = instance_size['ri']['yrTerm3']['allUpfront']
-            instance.best = float(instance_allUpfront['effectiveHourly'])
+            instance_all_upfront = instance_size['ri']['yrTerm3']['allUpfront']
+            instance.best = float(instance_all_upfront['effectiveHourly'])
             for reserved in self.reserved_instances['ReservedInstances']:
-                    if 'InstancesLeft' not in reserved.keys():
-                        reserved['InstancesLeft'] = reserved['InstanceCount']
-                    if instance.match_reserved_instance(reserved):
-                        instance._reserved = True
-                        instance.current = reserved['UsagePrice']
-                        reserved['InstancesLeft'] -= 1
-                        break
+                if 'InstancesLeft' not in reserved.keys():
+                    reserved['InstancesLeft'] = reserved['InstanceCount']
+                if instance.match_reserved_instance(reserved):
+                    instance.reserved = 'Yes'
+                    instance.current = reserved['UsagePrice']
+                    reserved['InstancesLeft'] -= 1
+                    break
 
     def __repr__(self):
-        headers = [
-                'Id',
-                'Name',
-                'Type',
-                'AZ',
-                'OS',
-                'State',
-                'Launch time',
-                'Reserved',
-                'Current hourly price',
-                'Renewed hourly price',
-                ]
+        headers = ['Id',
+                   'Name',
+                   'Type',
+                   'AZ',
+                   'OS',
+                   'State',
+                   'Launch time',
+                   'Reserved',
+                   'Current hourly price',
+                   'Renewed hourly price']
         table = []
         for instance in self.instances:
-            row = [
-                    instance.id,
-                    instance.name,
-                    instance.size,
-                    instance.availability_zone,
-                    instance.operating_system,
-                    instance.state,
-                    instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
-                    instance.reserved,
-                    instance.current,
-                    instance.best,
-                    ]
+            row = [instance.id,
+                   instance.name,
+                   instance.size,
+                   instance.availability_zone,
+                   instance.operating_system,
+                   instance.state,
+                   instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
+                   instance.reserved,
+                   instance.current,
+                   instance.best]
             table.append(row)
         return tabulate(table, headers)

@@ -59,7 +59,7 @@ def test_process_model(monkeypatch, mock_requests_get, mock_processor):
 
     monkeypatch.setattr('requests.get', mock_requests_get)
     mock_requests_get.set_responses(sample_content)
-    monkeypatch.setattr('accloudtant.aws.prices.section_names', {
+    monkeypatch.setattr('accloudtant.aws.prices.SECTION_NAMES', {
         'linux-od.min.js': {
            'process': mock_processor,
            },
@@ -98,7 +98,7 @@ def test_process_generic(monkeypatch):
         }
     instances = None
 
-    monkeypatch.setattr('accloudtant.aws.prices.section_names', {
+    monkeypatch.setattr('accloudtant.aws.prices.SECTION_NAMES', {
         'linux-od.min.js': {
             'key': 'od',
             'kind': 'linux',
