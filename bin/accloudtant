@@ -9,8 +9,8 @@ def cli():
     pass
 
 
-@cli.command()
-def list():
+@cli.command('list')
+def price_list():
     click.echo(Prices())
 
 
