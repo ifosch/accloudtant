@@ -7,6 +7,7 @@ from accloudtant.aws.prices import Prices
 
 
 class Reports(object):
+
     def __init__(self):
         ec2 = boto3.resource('ec2')
         self.instances = [Instance(i) for i in ec2.instances.all()]

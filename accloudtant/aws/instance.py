@@ -1,4 +1,5 @@
 class Instance(object):
+
     def __init__(self, obj):
         self.id = obj.id
         self.tags = obj.tags

@@ -4,6 +4,7 @@ import accloudtant.aws.prices
 
 
 class MockEC2Instance(object):
+
     def __init__(self, instance):
         self.instance = instance
 
@@ -44,6 +45,7 @@ class MockEC2Instance(object):
 @pytest.fixture(scope="session")
 def ec2_resource():
     class MockEC2Instances(object):
+
         def __init__(self, instances):
             self.instances = instances
 
@@ -52,6 +54,7 @@ def ec2_resource():
                 yield MockEC2Instance(instance)
 
     class MockEC2Resource(object):
+
         def __init__(self, responses):
             self.responses = responses
 
@@ -59,6 +62,7 @@ def ec2_resource():
             return MockEC2Instances(self.responses['instances'])
 
     class MockEC2ResourceCall(object):
+
         def set_responses(self, responses=None):
             if responses is None:
                 responses = {}
@@ -73,6 +77,7 @@ def ec2_resource():
 @pytest.fixture(scope="session")
 def ec2_client():
     class MockEC2Client(object):
+
         def __init__(self, instances, reserved):
             self.instances = instances
             self.reserved = reserved
@@ -84,6 +89,7 @@ def ec2_client():
             return self.reserved
 
     class MockEC2ClientCall(object):
+
         def set_responses(self, instances=None, reserved=None):
             if instances is None:
                 instances = {}
@@ -101,6 +107,7 @@ def ec2_client():
 @pytest.fixture
 def mock_requests_get():
     class MockRequestsGet(object):
+
         def set_responses(self, responses=None):
             if responses is None:
                 responses = {}
@@ -125,6 +132,7 @@ def mock_requests_get():
 @pytest.fixture
 def process_ec2():
     class MockProcessEC2(object):
+
         def set_responses(self, responses=None, unknown=None):
             if responses is None:
                 responses = {}
@@ -148,6 +156,7 @@ def process_ec2():
 @pytest.fixture
 def mock_process_model():
     class MockProcessModel(object):
+
         def set_responses(self, responses=None):
             if responses is None:
                 responses = {}
@@ -168,6 +177,7 @@ def mock_process_model():
 @pytest.fixture
 def mock_processor():
     class MockProcessor(object):
+
         def __call__(self, data, js_name, instances):
             self.data_sets.append(data)
             instances.update(data)
@@ -182,13 +192,14 @@ def mock_processor():
 @pytest.fixture
 def mock_process_generic():
     class MockProcessGeneric(object):
+
         def __call__(self, data, js_name, instances):
             section = accloudtant.aws.prices.SECTION_NAMES[js_name]
             generic = {
                 'version': "0.1",
                 'kind': section['kind'],
                 'key': section['key'],
-                }
+            }
             instances = instances or {}
             processed_data = {}
             instances.update({section['kind']: processed_data, })

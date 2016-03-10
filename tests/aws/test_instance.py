@@ -22,17 +22,16 @@ def test_instance():
             'Name': 'running',
         },
         'launch_time': datetime.datetime(
-                2015,
-                10,
-                22,
-                14,
-                15,
-                10,
-                tzinfo=tzutc()
-            ),
+            2015,
+            10,
+            22,
+            14,
+            15,
+            10,
+            tzinfo=tzutc()
+        ),
         'console_output': {'Output': 'RHEL Linux', },
     }
-
 
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)
@@ -61,100 +60,100 @@ def test_instance():
 
 def test_guess_os():
     instance_data_win = {
-            'id': 'i-912a4392',
-            'tags': [{
-                'Key': 'Name',
-                'Value': 'web1',
-            }, ],
-            'instance_type': 'c3.8xlarge',
-            'placement': {
-                'AvailabilityZone': 'us-east-1c',
-            },
-            'state': {
-                'Name': 'running',
-            },
-            'launch_time': datetime.datetime(
-                    2015,
-                    10,
-                    22,
-                    14,
-                    15,
-                    10,
-                    tzinfo=tzutc(),
-                ),
-            'console_output': {'Output': 'Windows', },
+        'id': 'i-912a4392',
+        'tags': [{
+            'Key': 'Name',
+            'Value': 'web1',
+        }, ],
+        'instance_type': 'c3.8xlarge',
+        'placement': {
+            'AvailabilityZone': 'us-east-1c',
+        },
+        'state': {
+            'Name': 'running',
+        },
+        'launch_time': datetime.datetime(
+            2015,
+            10,
+            22,
+            14,
+            15,
+            10,
+            tzinfo=tzutc(),
+        ),
+        'console_output': {'Output': 'Windows', },
     }
     instance_data_rhel = {
-            'id': 'i-1840273e',
-            'tags': [{
-                'Key': 'Name',
-                'Value': 'app1',
-            }, ],
-            'instance_type': 'r2.8xlarge',
-            'placement': {
-                'AvailabilityZone': 'us-east-1b',
-            },
-            'state': {
-                'Name': 'running',
-            },
-            'launch_time': datetime.datetime(
-                    2015,
-                    10,
-                    22,
-                    14,
-                    15,
-                    10,
-                    tzinfo=tzutc()
-                ),
-            'console_output': {'Output': 'RHEL Linux', },
+        'id': 'i-1840273e',
+        'tags': [{
+            'Key': 'Name',
+            'Value': 'app1',
+        }, ],
+        'instance_type': 'r2.8xlarge',
+        'placement': {
+            'AvailabilityZone': 'us-east-1b',
+        },
+        'state': {
+            'Name': 'running',
+        },
+        'launch_time': datetime.datetime(
+            2015,
+            10,
+            22,
+            14,
+            15,
+            10,
+            tzinfo=tzutc()
+        ),
+        'console_output': {'Output': 'RHEL Linux', },
     }
     instance_data_sles = {
-            'id': 'i-9840273d',
-            'tags': [{
-                'Key': 'Name',
-                'Value': 'app2',
-            }, ],
-            'instance_type': 'r2.8xlarge',
-            'placement': {
-                'AvailabilityZone': 'us-east-1c',
-            },
-            'state': {
-                'Name': 'stopped',
-            },
-            'launch_time': datetime.datetime(
-                    2015,
-                    10,
-                    22,
-                    14,
-                    15,
-                    10,
-                    tzinfo=tzutc()
-                ),
-            'console_output': {'Output': 'SUSE Linux', },
+        'id': 'i-9840273d',
+        'tags': [{
+            'Key': 'Name',
+            'Value': 'app2',
+        }, ],
+        'instance_type': 'r2.8xlarge',
+        'placement': {
+            'AvailabilityZone': 'us-east-1c',
+        },
+        'state': {
+            'Name': 'stopped',
+        },
+        'launch_time': datetime.datetime(
+            2015,
+            10,
+            22,
+            14,
+            15,
+            10,
+            tzinfo=tzutc()
+        ),
+        'console_output': {'Output': 'SUSE Linux', },
     }
     instance_data_linux = {
-            'id': 'i-1840273c',
-            'tags': [{
-                'Key': 'Name',
-                'Value': 'database2',
-            }, ],
-            'instance_type': 'r2.8xlarge',
-            'placement': {
-                'AvailabilityZone': 'us-east-1c',
-            },
-            'state': {
-                'Name': 'running',
-            },
-            'launch_time': datetime.datetime(
-                    2015,
-                    10,
-                    22,
-                    14,
-                    15,
-                    10,
-                    tzinfo=tzutc()
-                ),
-            'console_output': {'Output': 'Linux', },
+        'id': 'i-1840273c',
+        'tags': [{
+            'Key': 'Name',
+            'Value': 'database2',
+        }, ],
+        'instance_type': 'r2.8xlarge',
+        'placement': {
+            'AvailabilityZone': 'us-east-1c',
+        },
+        'state': {
+            'Name': 'running',
+        },
+        'launch_time': datetime.datetime(
+            2015,
+            10,
+            22,
+            14,
+            15,
+            10,
+            tzinfo=tzutc()
+        ),
+        'console_output': {'Output': 'Linux', },
     }
 
     ec2_instance_win = MockEC2Instance(instance_data_win)
@@ -188,14 +187,14 @@ def test_match_reserved_instance():
             'Name': 'running',
         },
         'launch_time': datetime.datetime(
-                2015,
-                10,
-                22,
-                14,
-                15,
-                10,
-                tzinfo=tzutc()
-            ),
+            2015,
+            10,
+            22,
+            14,
+            15,
+            10,
+            tzinfo=tzutc()
+        ),
         'console_output': {'Output': 'RHEL Linux', },
     }
     reserved_instance = {
@@ -204,25 +203,25 @@ def test_match_reserved_instance():
         'InstanceCount': 1,
         'InstanceType': 'r2.8xlarge',
         'Start': datetime.datetime(
-                2011,
-                6,
-                5,
-                6,
-                20,
-                10,
-                494000,
-                tzinfo=tzutc()
-            ),
+            2011,
+            6,
+            5,
+            6,
+            20,
+            10,
+            494000,
+            tzinfo=tzutc()
+        ),
         'RecurringCharges': [],
         'End': datetime.datetime(
-                2011,
-                6,
-                5,
-                6,
-                20,
-                10,
-                tzinfo=tzutc()
-            ),
+            2011,
+            6,
+            5,
+            6,
+            20,
+            10,
+            tzinfo=tzutc()
+        ),
         'CurrencyCode': 'USD',
         'OfferingType': 'Medium Utilization',
         'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233321',
