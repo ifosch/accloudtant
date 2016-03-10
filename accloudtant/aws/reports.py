@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 
 import boto3
+from botocore import exceptions
 from tabulate import tabulate
 from accloudtant.aws.instance import Instance
 from accloudtant.aws.prices import Prices
+import sys
 
 
 class Reports(object):
     def __init__(self):
         ec2 = boto3.resource('ec2')
-        self.instances = [Instance(i) for i in ec2.instances.all()]
         ec2_client = boto3.client('ec2')
-        self.reserved_instances = ec2_client.describe_reserved_instances()
+        try:
+            self.instances = [Instance(i) for i in ec2.instances.all()]
+            self.reserved_instances = ec2_client.describe_reserved_instances()
+        except exceptions.NoCredentialsError:
+            print("Error: no AWS credentials found", file=sys.stderr)
+            sys.exit(1)
         self.prices = Prices()
         self.find_reserved_instance()
 
