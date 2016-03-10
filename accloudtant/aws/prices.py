@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-from os import environ
 import io
 import json
 import re
 import warnings
+from os import environ
+
 import requests
 from tabulate import tabulate
+
 from accloudtant.utils import fix_lazy_json
 
 

@@ -1,6 +1,7 @@
 import warnings
-import pytest
+
 import accloudtant.aws.prices
+import pytest
 
 
 class MockEC2Instance(object):

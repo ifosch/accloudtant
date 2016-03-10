@@ -1,7 +1,9 @@
 import datetime
-import pytest
+
 from dateutil.tz import tzutc
+
 import accloudtant.aws.instance
+import pytest
 from conftest import MockEC2Instance
 
 

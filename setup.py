@@ -1,5 +1,6 @@
-from os import path
 from codecs import open as copen
+from os import path
+
 from setuptools import setup
 
 HERE = path.abspath(path.dirname(__file__))

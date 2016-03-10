@@ -2,6 +2,7 @@
 
 import boto3
 from tabulate import tabulate
+
 from accloudtant.aws.instance import Instance
 from accloudtant.aws.prices import Prices
 
