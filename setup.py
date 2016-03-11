@@ -21,7 +21,7 @@ setup(
     author='Ignasi Fosch, Eduardo Bellido Bellido, David Arcos',
     author_email='accloudtant@y10k.ws',
     url='https://github.com/ifosch/accloudtant',
-    download_url='https://github.com/ifosch/accloudtant/tarball/0.1.0',
+    download_url='https://github.com/ifosch/accloudtant/archive/0.1.0',
     keywords=['cloud', 'AWS', 'costs'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
