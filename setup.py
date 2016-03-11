@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from distutils.core import setup
+from setuptools import setup
 setup(
     name='accloudtant',
     packages=['accloudtant'],
@@ -21,7 +21,7 @@ setup(
     author='Ignasi Fosch, Eduardo Bellido Bellido, David Arcos',
     author_email='accloudtant@y10k.ws',
     url='https://github.com/ifosch/accloudtant',
-    download_url='https://github.com/ifosch/accloudtant/tarball/0.1.0.alpha1',
+    download_url='https://github.com/ifosch/accloudtant/tarball/0.1.0',
     keywords=['cloud', 'AWS', 'costs'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
