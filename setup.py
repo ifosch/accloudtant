@@ -1,20 +1,36 @@
-from setuptools import setup
-from codecs import open
-from os import path
+#   Copyright 2015-2016 See CONTRIBUTORS.md file
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
 
-here = path.abspath(path.dirname(__file__))
-
-# TODO: Review
-#  https://coderwall.com/p/qawuyq/use-markdown-readme-s-in-python-modules
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
-
+from distutils.core import setup
 setup(
     name='accloudtant',
-    version='0.0.1.dev1',
+    packages=['accloudtant'],
+    version='0.1.0',
     description='Cloud cost calculation tool',
-    long_description=long_description,
+    author='Ignasi Fosch, Eduardo Bellido Bellido, David Arcos',
+    author_email='accloudtant@y10k.ws',
     url='https://github.com/ifosch/accloudtant',
+    download_url='https://github.com/ifosch/accloudtant/tarball/0.1.0.alpha1',
+    keywords=['cloud', 'AWS', 'costs'],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: Apache Software License',
+        'Topic :: Office/Business :: Financial :: Investment',
+    ],
     install_requires=['requests', 'tabulate', 'click', 'boto3'],
     scripts=['bin/accloudtant'],
 )
