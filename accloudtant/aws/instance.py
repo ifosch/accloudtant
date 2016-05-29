@@ -62,7 +62,7 @@ class Instance(object):
     @property
     def name(self):
         names = [tag for tag in self.tags if tag['Key'] == 'Name']
-        if names is None:
+        if len(names) == 0:
             return ''
         else:
             return names[0]['Value']
