@@ -73,6 +73,57 @@ def test_instance():
     assert(instance.best == 0.293)
 
 
+def test_unnamed_instance():
+    az = 'us-east-1b'
+    region = 'us-east-1'
+    instance_data = {
+        'id': 'i-1840273e',
+        'tags': [],
+        'instance_type': 'r2.8xlarge',
+        'placement': {
+            'AvailabilityZone': az,
+        },
+        'state': {
+            'Name': 'running',
+        },
+        'launch_time': datetime.datetime(
+                2015,
+                10,
+                22,
+                14,
+                15,
+                10,
+                tzinfo=tzutc()
+            ),
+        'console_output': {'Output': 'RHEL Linux', },
+    }
+
+
+    ec2_instance = MockEC2Instance(instance_data)
+    instance = accloudtant.aws.instance.Instance(ec2_instance)
+
+    assert(instance.id == ec2_instance.id)
+    assert(instance.reserved == 'No')
+    assert(instance.name == '')
+    assert(instance.size == ec2_instance.instance_type)
+    assert(instance.availability_zone == az)
+    assert(instance.region == region)
+    assert(instance.operating_system == 'Red Hat Enterprise Linux')
+    assert(instance.key == 'rhel')
+    assert(instance.state == ec2_instance.state['Name'])
+    assert(instance.current == 0.0)
+    assert(instance.best == 0.0)
+
+    with pytest.raises(ValueError):
+        instance.reserved = 'Maybe'
+
+    instance.current = 0.392
+    instance.best = 0.293
+
+    assert(instance.current == 0.392)
+    assert(instance.best == 0.293)
+
+
 def test_guess_os():
     instance_data_win = {
             'id': 'i-912a4392',
