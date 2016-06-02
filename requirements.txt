@@ -1,0 +1,5 @@
+boto3==1.1.4
+botocore==1.2.10
+click==4.1
+requests==2.8.1
+tabulate==0.7.5
