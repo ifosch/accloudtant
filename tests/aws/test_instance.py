@@ -47,7 +47,6 @@ def test_instance():
         'console_output': {'Output': 'RHEL Linux', },
     }
 
-
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)
 
@@ -97,7 +96,6 @@ def test_unnamed_instance():
             ),
         'console_output': {'Output': 'RHEL Linux', },
     }
-
 
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)

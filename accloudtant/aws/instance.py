@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+
 class Instance(object):
     def __init__(self, obj):
         self.id = obj.id
@@ -88,14 +89,14 @@ class Instance(object):
         return self._state['Name']
 
     def match_reserved_instance(self, reserved):
-        if any((self.state != 'running',
-                reserved['State'] != 'active',
-                reserved['InstancesLeft'] == 0,
-                reserved['ProductDescription'] != self.operating_system,
-                reserved['InstanceType'] != self.size,
-                reserved['AvailabilityZone'] != self.availability_zone)):
-            return False
-        return True
+        return not (
+           self.state != 'running' or
+           reserved['State'] != 'active' or
+           reserved['InstancesLeft'] == 0 or
+           reserved['ProductDescription'] != self.operating_system or
+           reserved['InstanceType'] != self.size or
+           reserved['AvailabilityZone'] != self.availability_zone
+        )
 
 
 def guess_os(instance):
