@@ -9,12 +9,12 @@ def cli():
     pass
 
 
-@cli.command('list')
+@cli.command('list', short_help='prints current price lists')
 def price_list():
     click.echo(Prices())
 
 
-@cli.command()
+@cli.command(short_help='provides price/usage reports')
 def report():
     click.echo(Reports())
 
