@@ -65,6 +65,14 @@ def ec2_resource():
             for instance in self.instances:
                 yield MockEC2Instance(instance)
 
+        def filter(self, Filters=None):
+            if Filters is None:
+                self.all()
+            if Filters[0]['Name'] == 'instance-state-name':
+                for instance in self.instances:
+                    if instance['state']['Name'] in Filters[0]['Values']:
+                        yield MockEC2Instance(instance)
+
     class MockEC2Resource(object):
         def __init__(self, responses):
             self.responses = responses
@@ -94,7 +102,19 @@ def ec2_client():
         def describe_instances(self):
             return self.instances
 
-        def describe_reserved_instances(self):
+        def describe_reserved_instances(self, Filters=None):
+            final_reserved = {'ReservedInstances': []}
+            if Filters is None:
+                final_reserved = self.reserved
+            else:
+                filter = Filters[0]
+                if filter['Name'] == 'state':
+                    final_reserved['ReservedInstances'] = [
+                        reserved_instance
+                        for reserved_instance
+                        in self.reserved['ReservedInstances']
+                        if reserved_instance['State'] not in filter['Values']
+                    ]
             return self.reserved
 
     class MockEC2ClientCall(object):

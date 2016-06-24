@@ -17,6 +17,10 @@ from dateutil.tz import tzutc
 import accloudtant.aws.reports
 
 
+def get_future_date(years=1):
+    return datetime.datetime.now() + datetime.timedelta(years)
+
+
 def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
     instances = {
         'instances': [{
@@ -232,16 +236,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                     tzinfo=tzutc()
                 ),
             'RecurringCharges': [],
-            'End': datetime.datetime(
-                    2016,
-                    6,
-                    5,
-                    6,
-                    20,
-                    10,
-                    494000,
-                    tzinfo=tzutc()
-                ),
+            'End': get_future_date(),
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
@@ -266,16 +261,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                     tzinfo=tzutc()
                 ),
             'RecurringCharges': [],
-            'End': datetime.datetime(
-                    2016,
-                    6,
-                    5,
-                    6,
-                    20,
-                    10,
-                    494000,
-                    tzinfo=tzutc()
-                ),
+            'End': get_future_date(),
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233321',
@@ -300,15 +286,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                     tzinfo=tzutc()
                 ),
             'RecurringCharges': [],
-            'End': datetime.datetime(
-                    2016,
-                    6,
-                    5,
-                    6,
-                    20,
-                    10,
-                    tzinfo=tzutc()
-                ),
+            'End': get_future_date(),
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233322',
@@ -333,15 +311,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                     tzinfo=tzutc()
                 ),
             'RecurringCharges': [],
-            'End': datetime.datetime(
-                    2016,
-                    6,
-                    5,
-                    6,
-                    20,
-                    10,
-                    tzinfo=tzutc()
-                ),
+            'End': get_future_date(),
             'CurrencyCode': 'USD',
             'OfferingType': 'Medium Utilization',
             'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233320',
@@ -421,7 +391,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
                             },
                         },
                     },
-                    'od': '0.767',
+                    'od': '0.867',
                     'memoryGiB': '15',
                     'vCPU': '8',
                 },
@@ -618,7 +588,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
             'best': 0.3892,
         },
     }
-    expected = open('tests/aws/report_expected.txt', 'r').read()
+    expected = open('tests/aws/report_running_expected.txt', 'r').read()
 
     monkeypatch.setattr('boto3.resource', ec2_resource)
     ec2_resource.set_responses(instances)
@@ -634,6 +604,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
     print(reports)
     out, err = capsys.readouterr()
 
+    assert(len(reports.instances) == 6)
     for mock in instances['instances']:
         mock['current'] = instances_prices[mock['id']]['current']
         mock['best'] = instances_prices[mock['id']]['best']
@@ -641,5 +612,4 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
             if instance.id == mock['id']:
                 assert(instance.current == mock['current'])
                 assert(instance.best == mock['best'])
-    print(out)
     assert(out == expected)
