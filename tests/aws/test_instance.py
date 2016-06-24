@@ -16,6 +16,7 @@ import datetime
 import pytest
 from dateutil.tz import tzutc
 import accloudtant.aws.instance
+from accloudtant.aws.reserved_instance import ReservedInstance
 from conftest import MockEC2Instance
 
 
@@ -261,7 +262,7 @@ def test_match_reserved_instance(benchmark):
             ),
         'console_output': {'Output': 'RHEL Linux', },
     }
-    reserved_instance = {
+    ri_data = {
         'ProductDescription': 'Red Hat Enterprise Linux',
         'InstanceTenancy': 'default',
         'InstanceCount': 1,
@@ -298,31 +299,36 @@ def test_match_reserved_instance(benchmark):
 
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)
-    reserved_instance['InstancesLeft'] = reserved_instance['InstanceCount']
+    reserved_instance = ReservedInstance(ri_data)
 
     assert(instance.match_reserved_instance(reserved_instance))
     benchmark(instance.match_reserved_instance, reserved_instance)
 
-    reserved_instance['State'] = 'pending'
+    ri_data['State'] = 'pending'
+    reserved_instance = ReservedInstance(ri_data)
 
     assert(not instance.match_reserved_instance(reserved_instance))
 
-    reserved_instance['State'] = 'active'
-    reserved_instance['InstancesLeft'] = 0
+    ri_data['State'] = 'active'
+    reserved_instance = ReservedInstance(ri_data)
+    reserved_instance.instances_left = 0
 
     assert(not instance.match_reserved_instance(reserved_instance))
 
-    reserved_instance['InstacesLeft'] = 1
-    reserved_instance['ProductDescription'] = 'Windows'
+    ri_data['ProductDescription'] = 'Windows'
+    reserved_instance = ReservedInstance(ri_data)
+    reserved_instance.instances_left = 1
 
     assert(not instance.match_reserved_instance(reserved_instance))
 
-    reserved_instance['ProductionDescription'] = 'Red Hat Enterprise Linux'
-    reserved_instance['InstaceType'] = 't1.micro'
+    ri_data['ProductionDescription'] = 'Red Hat Enterprise Linux'
+    ri_data['InstaceType'] = 't1.micro'
+    reserved_instance = ReservedInstance(ri_data)
 
     assert(not instance.match_reserved_instance(reserved_instance))
 
-    reserved_instance['InstaceType'] = 'r2.8xlarge'
-    reserved_instance['AvailabilityZone'] = 'us-east-1c'
+    ri_data['InstaceType'] = 'r2.8xlarge'
+    ri_data['AvailabilityZone'] = 'us-east-1c'
+    reserved_instance = ReservedInstance(ri_data)
 
     assert(not instance.match_reserved_instance(reserved_instance))

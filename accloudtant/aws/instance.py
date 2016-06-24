@@ -94,11 +94,11 @@ class Instance(object):
     def match_reserved_instance(self, reserved):
         return not (
            self.state != 'running' or
-           reserved['State'] != 'active' or
-           reserved['InstancesLeft'] == 0 or
-           reserved['ProductDescription'] != self.operating_system or
-           reserved['InstanceType'] != self.size or
-           reserved['AvailabilityZone'] != self.availability_zone
+           reserved.state != 'active' or
+           reserved.instances_left == 0 or
+           reserved.product_description != self.operating_system or
+           reserved.instance_type != self.size or
+           reserved.az != self.availability_zone
         )
 
 
