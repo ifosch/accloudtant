@@ -17,6 +17,10 @@
 class ReservedInstance(object):
     def __init__(self, data):
         self.reserved_instance = data
+        if data['State'] != 'active':
+            self.instances_left = 0
+        else:
+            self.instances_left = self.instance_count
 
     @property
     def id(self):
@@ -77,3 +81,6 @@ class ReservedInstance(object):
     @property
     def instance_tenancy(self):
         return self.reserved_instance['InstanceTenancy']
+
+    def link(self, instance):
+        self.instances_left -= 1
