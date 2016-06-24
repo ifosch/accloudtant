@@ -618,7 +618,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
             'best': 0.3892,
         },
     }
-    expected = open('tests/aws/report_expected.txt', 'r').read()
+    expected = open('tests/aws/report_running_expected.txt', 'r').read()
 
     monkeypatch.setattr('boto3.resource', ec2_resource)
     ec2_resource.set_responses(instances)
@@ -634,6 +634,7 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
     print(reports)
     out, err = capsys.readouterr()
 
+    assert(len(reports.instances) == 6)
     for mock in instances['instances']:
         mock['current'] = instances_prices[mock['id']]['current']
         mock['best'] = instances_prices[mock['id']]['best']
@@ -641,5 +642,4 @@ def test_reports(capsys, monkeypatch, ec2_resource, ec2_client, process_ec2):
             if instance.id == mock['id']:
                 assert(instance.current == mock['current'])
                 assert(instance.best == mock['best'])
-    print(out)
     assert(out == expected)

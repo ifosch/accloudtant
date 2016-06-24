@@ -65,6 +65,14 @@ def ec2_resource():
             for instance in self.instances:
                 yield MockEC2Instance(instance)
 
+        def filter(self, Filters=None):
+            if Filters is None:
+                self.all()
+            if Filters[0]['Name'] == 'instance-state-name':
+                for instance in self.instances:
+                    if instance['state']['Name'] in Filters[0]['Values']:
+                        yield MockEC2Instance(instance)
+
     class MockEC2Resource(object):
         def __init__(self, responses):
             self.responses = responses

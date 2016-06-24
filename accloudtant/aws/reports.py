@@ -25,8 +25,15 @@ class Reports(object):
     def __init__(self):
         ec2 = boto3.resource('ec2')
         ec2_client = boto3.client('ec2')
+        filters = [{
+            'Name': 'instance-state-name',
+            'Values': ['running', ],
+        }, ]
         try:
-            self.instances = [Instance(i) for i in ec2.instances.all()]
+            self.instances = [
+                Instance(i) for i in ec2.instances.filter(Filters=filters)
+            ]
+            # self.instances = [Instance(i) for i in ec2.instances.all()]
             self.reserved_instances = ec2_client.describe_reserved_instances()
         except exceptions.NoCredentialsError:
             print("Error: no AWS credentials found", file=sys.stderr)
