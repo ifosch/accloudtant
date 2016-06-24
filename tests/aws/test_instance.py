@@ -47,7 +47,6 @@ def test_instance():
         'console_output': {'Output': 'RHEL Linux', },
     }
 
-
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)
 
@@ -97,7 +96,6 @@ def test_unnamed_instance():
             ),
         'console_output': {'Output': 'RHEL Linux', },
     }
-
 
     ec2_instance = MockEC2Instance(instance_data)
     instance = accloudtant.aws.instance.Instance(ec2_instance)
@@ -237,7 +235,7 @@ def test_guess_os():
     assert(instance_linux.operating_system == 'Linux/UNIX')
 
 
-def test_match_reserved_instance():
+def test_match_reserved_instance(benchmark):
     az = 'us-east-1b'
     instance_data = {
         'id': 'i-1840273e',
@@ -303,6 +301,7 @@ def test_match_reserved_instance():
     reserved_instance['InstancesLeft'] = reserved_instance['InstanceCount']
 
     assert(instance.match_reserved_instance(reserved_instance))
+    benchmark(instance.match_reserved_instance, reserved_instance)
 
     reserved_instance['State'] = 'pending'
 
