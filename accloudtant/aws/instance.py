@@ -28,6 +28,9 @@ class Instance(object):
             'best': 0.0,
         }
 
+    def __repr__(self):
+        return "<accloudtant.aws.instance.Instance id={}>".format(self.id)
+
     @property
     def current(self):
         return self._prices['current']
