@@ -17,6 +17,7 @@ import boto3
 from botocore import exceptions
 from tabulate import tabulate
 from accloudtant.aws.instance import Instance
+from accloudtant.aws.reserved_instance import ReservedInstance
 from accloudtant.aws.prices import Prices
 import sys
 
@@ -39,10 +40,12 @@ class Reports(object):
                 for i in ec2.instances.filter(Filters=instances_filters)
             ]
             # self.instances = [Instance(i) for i in ec2.instances.all()]
-            self.reserved_instances = ec2_client.\
-                describe_reserved_instances(
+            self.reserved_instances = [
+                ReservedInstance(i)
+                for i in ec2_client.describe_reserved_instances(
                     Filters=reserved_instances_filters
-                )
+                )['ReservedInstances']
+            ]
             # self.reserved_instances = ec2_client
             # .describe_reserved_instances()
         except exceptions.NoCredentialsError:
@@ -60,13 +63,11 @@ class Reports(object):
                 instance.current = 0.0
             instance_all_upfront = instance_size['ri']['yrTerm3']['allUpfront']
             instance.best = float(instance_all_upfront['effectiveHourly'])
-            for reserved in self.reserved_instances['ReservedInstances']:
-                if 'InstancesLeft' not in reserved.keys():
-                    reserved['InstancesLeft'] = reserved['InstanceCount']
+            for reserved in self.reserved_instances:
                 if instance.match_reserved_instance(reserved):
                     instance.reserved = 'Yes'
-                    instance.current = reserved['UsagePrice']
-                    reserved['InstancesLeft'] -= 1
+                    instance.current = reserved.usage_price
+                    reserved.link(instance)
                     break
 
     def __repr__(self):
