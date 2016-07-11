@@ -20,7 +20,7 @@ from accloudtant.aws.instance import Instance
 from accloudtant.aws.reserved_instance import ReservedInstance
 from accloudtant.aws.prices import Prices
 import sys
-
+import traceback
 
 class Reports(object):
     def __init__(self):
@@ -48,8 +48,9 @@ class Reports(object):
             ]
             # self.reserved_instances = ec2_client
             # .describe_reserved_instances()
-        except exceptions.NoCredentialsError:
-            print("Error: no AWS credentials found", file=sys.stderr)
+        except exceptions.NoCredentialsError as nc:
+            print("Error: no AWS credentials found",
+                  traceback.print_exc(file=sys.stderr))
             sys.exit(1)
         self.prices = Prices()
         self.find_reserved_instance()
