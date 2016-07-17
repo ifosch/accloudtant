@@ -127,7 +127,7 @@ def process_ec2(url):
     """
     instances = {}
     pricings = requests.get(url)
-    for html_line in io.StringIO(pricings.text):
+    for html_line in io.StringIO(pricings.content.decode("utf-8")):
         if 'model:' in html_line:
             url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())
             instances = process_model(url, instances)
@@ -143,7 +143,7 @@ def process_model(url, instances=None):
         instances = {}
     js_name = url.split('/')[-1]
     pricing = requests.get(url)
-    for js_line in io.StringIO(pricing.text.replace("\n", "")):
+    for js_line in io.StringIO(pricing.content.decode("utf-8").replace("\n", "")):
         if 'callback' in js_line:
             data = fix_lazy_json(re.sub(r".*callback\((.+)\).*",
                                         r"\1", js_line))

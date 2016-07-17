@@ -12,10 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import codecs
 import accloudtant.utils
 
 
 def test_fix_lazy_json():
-    bad_json = '{ key: "value" }'
+    bad_json = '{ key: "value" }'.encode('utf-8')
     good_json = '{"key":"value"}'
-    assert(accloudtant.utils.fix_lazy_json(bad_json) == good_json)
+    assert(accloudtant.utils.fix_lazy_json(codecs.decode(bad_json)) == good_json)

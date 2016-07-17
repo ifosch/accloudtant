@@ -146,6 +146,7 @@ def mock_requests_get():
                 self.text = self.responses[url]
             else:
                 self.text = 'Default response'
+            self.content = self.text.encode('utf-8')
             return self
 
         def __init__(self, responses=None):
