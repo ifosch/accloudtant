@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import print_function
+import logging
 import boto3
 from botocore import exceptions
 from tabulate import tabulate
@@ -40,17 +40,14 @@ class Reports(object):
                 Instance(i)
                 for i in ec2.instances.filter(Filters=instances_filters)
             ]
-            # self.instances = [Instance(i) for i in ec2.instances.all()]
             self.reserved_instances = [
                 ReservedInstance(i)
                 for i in ec2_client.describe_reserved_instances(
                     Filters=reserved_instances_filters
                 )['ReservedInstances']
             ]
-            # self.reserved_instances = ec2_client
-            # .describe_reserved_instances()
         except exceptions.NoCredentialsError:
-            print("Error: no AWS credentials found", file=sys.stderr)
+            logging.error("Error: no AWS credentials found")
             sys.exit(1)
         self.prices = Prices()
         self.find_reserved_instance()
