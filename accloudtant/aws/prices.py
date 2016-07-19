@@ -143,7 +143,8 @@ def process_model(url, instances=None):
         instances = {}
     js_name = url.split('/')[-1]
     pricing = requests.get(url)
-    for js_line in io.StringIO(pricing.content.decode("utf-8").replace("\n", "")):
+    content = pricing.content.decode("utf-8").replace("\n", "")
+    for js_line in io.StringIO(content):
         if 'callback' in js_line:
             data = fix_lazy_json(re.sub(r".*callback\((.+)\).*",
                                         r"\1", js_line))

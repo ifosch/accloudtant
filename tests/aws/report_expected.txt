@@ -7,3 +7,7 @@ i-1840273d  database1  r2.8xlarge  us-east-1c  Linux/UNIX                stopped
 i-1840273c  database2  r2.8xlarge  us-east-1c  Linux/UNIX                running  2015-10-22 14:15:10  Yes                         0.611                   0.379
 i-1840273b  database3  r2.8xlarge  us-east-1c  Linux/UNIX                running  2015-10-22 14:15:10  Yes                         0.611                   0.379
 i-912a4393  test       t1.micro    us-east-1c  Linux/UNIX                running  2015-10-22 14:15:10  No                          0.767                   0.3892
+
+  Running    Stopped    Total instances    Used    Free    Not reserved    Total reserved
+---------  ---------  -----------------  ------  ------  --------------  ----------------
+        6          1                  7       5       1               1                 6

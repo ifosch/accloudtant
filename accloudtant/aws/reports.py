@@ -24,7 +24,7 @@ import sys
 
 
 class Reports(object):
-    def __init__(self, logger = None):
+    def __init__(self, logger=None):
         if logger is None:
             self.logger = getLogger('accloudtant.report')
             self.logger.setLevel(DEBUG)
@@ -33,25 +33,36 @@ class Reports(object):
             self.logger = logger
         ec2 = boto3.resource('ec2')
         ec2_client = boto3.client('ec2')
-        instances_filters = [{
-            'Name': 'instance-state-name',
-            'Values': ['running', ],
-        }, ]
-        reserved_instances_filters = [{
-            'Name': 'state',
-            'Values': ['active', ],
-        }, ]
+        self.counters = {
+            'instances': {
+                'total': 0,
+            },
+            'reserved': {
+                'total': 0,
+            },
+        }
+        self.instances = []
+        self.reserved_instances = []
         try:
-            self.instances = [
-                Instance(i)
-                for i in ec2.instances.filter(Filters=instances_filters)
-            ]
-            self.reserved_instances = [
-                ReservedInstance(i)
-                for i in ec2_client.describe_reserved_instances(
-                    Filters=reserved_instances_filters
-                )['ReservedInstances']
-            ]
+            for i in ec2.instances.all():
+                instance = Instance(i)
+                if instance.state == "running":
+                    self.instances.append(instance)
+                if instance.state not in self.counters['instances']:
+                    self.counters['instances'][instance.state] = 0
+                self.counters['instances'][instance.state] += 1
+                self.counters['instances']['total'] += 1
+            ri_key = 'ReservedInstances'
+            reserved_ctrs = self.counters['reserved']
+            for r in ec2_client.describe_reserved_instances()[ri_key]:
+                reserved_instance = ReservedInstance(r)
+                if reserved_instance.state == "active":
+                    self.reserved_instances.append(reserved_instance)
+                    reserved_ctrs['total'] += reserved_instance.instance_count
+            reserved_ctrs['free'] = reserved_ctrs['total']
+            reserved_ctrs['not_reserved'] = reserved_ctrs['total']
+            reserved_ctrs['used'] = 0
+            reserved_ctrs['not reserved'] = 0
         except exceptions.NoCredentialsError:
             logger.error("Error: no AWS credentials found")
             sys.exit(1)
@@ -72,30 +83,60 @@ class Reports(object):
                     instance.reserved = 'Yes'
                     instance.current = reserved.usage_price
                     reserved.link(instance)
+                    self.counters['reserved']['used'] += 1
+                    self.counters['reserved']['free'] -= 1
                     break
+        reserved_counters = self.counters['reserved']
+        instances_counters = self.counters['instances']
+        reserved_counters['not reserved'] = instances_counters['running']
+        reserved_counters['not reserved'] -= reserved_counters['used']
 
     def __repr__(self):
-        headers = ['Id',
-                   'Name',
-                   'Type',
-                   'AZ',
-                   'OS',
-                   'State',
-                   'Launch time',
-                   'Reserved',
-                   'Current hourly price',
-                   'Renewed hourly price']
+        headers = [
+            'Id',
+            'Name',
+            'Type',
+            'AZ',
+            'OS',
+            'State',
+            'Launch time',
+            'Reserved',
+            'Current hourly price',
+            'Renewed hourly price',
+        ]
         table = []
         for instance in self.instances:
-            row = [instance.id,
-                   instance.name,
-                   instance.size,
-                   instance.availability_zone,
-                   instance.operating_system,
-                   instance.state,
-                   instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
-                   instance.reserved,
-                   instance.current,
-                   instance.best]
+            row = [
+                instance.id,
+                instance.name,
+                instance.size,
+                instance.availability_zone,
+                instance.operating_system,
+                instance.state,
+                instance.launch_time.strftime('%Y-%m-%d %H:%M:%S'),
+                instance.reserved,
+                instance.current,
+                instance.best,
+            ]
             table.append(row)
-        return tabulate(table, headers)
+        footer_headers = [
+            'Running',
+            'Stopped',
+            'Total instances',
+            'Used',
+            'Free',
+            'Not reserved',
+            'Total reserved',
+        ]
+        footer_table = [[
+            self.counters['instances']['running'],
+            self.counters['instances']['stopped'],
+            self.counters['instances']['total'],
+            self.counters['reserved']['used'],
+            self.counters['reserved']['free'],
+            self.counters['reserved']['not reserved'],
+            self.counters['reserved']['total'],
+        ]]
+        inventory = tabulate(table, headers)
+        summary = tabulate(footer_table, footer_headers)
+        return "{}\n\n{}".format(inventory, summary)

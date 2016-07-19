@@ -19,4 +19,5 @@ import accloudtant.utils
 def test_fix_lazy_json():
     bad_json = '{ key: "value" }'.encode('utf-8')
     good_json = '{"key":"value"}'
-    assert(accloudtant.utils.fix_lazy_json(codecs.decode(bad_json)) == good_json)
+    result = accloudtant.utils.fix_lazy_json(codecs.decode(bad_json))
+    assert(result == good_json)
