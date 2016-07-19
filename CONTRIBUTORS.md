@@ -6,5 +6,7 @@
 
 # Thanks for their support to (sorted alphabetically)
 
+- **[Deepak Kumar Gupta](https://github.com/hellodk)**
+- **[Esteve Fernández](https://github.com/esteve)**
 - **[Jordi Soucheiron](https://github.com/jsoucheiron)**
 - **[Xavi Solé](https://github.com/xsb)**

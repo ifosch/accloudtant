@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import logging
+from logging import getLogger, StreamHandler, DEBUG
 import boto3
 from botocore import exceptions
 from tabulate import tabulate
@@ -24,7 +24,13 @@ import sys
 
 
 class Reports(object):
-    def __init__(self):
+    def __init__(self, logger = None):
+        if logger is None:
+            self.logger = getLogger('accloudtant.report')
+            self.logger.setLevel(DEBUG)
+            self.logger.addHandler(StreamHandler(sys.stdout))
+        else:
+            self.logger = logger
         ec2 = boto3.resource('ec2')
         ec2_client = boto3.client('ec2')
         instances_filters = [{
@@ -47,7 +53,7 @@ class Reports(object):
                 )['ReservedInstances']
             ]
         except exceptions.NoCredentialsError:
-            logging.error("Error: no AWS credentials found")
+            logger.error("Error: no AWS credentials found")
             sys.exit(1)
         self.prices = Prices()
         self.find_reserved_instance()
