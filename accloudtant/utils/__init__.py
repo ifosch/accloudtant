@@ -15,7 +15,6 @@
 #   limitations under the License.
 
 import io
-import codecs
 import tokenize
 import token
 

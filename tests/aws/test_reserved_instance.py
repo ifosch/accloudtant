@@ -13,7 +13,6 @@
 #   limitations under the License.
 
 import datetime
-import pytest
 from dateutil.tz import tzutc
 import accloudtant.aws.reserved_instance
 from conftest import MockEC2Instance
