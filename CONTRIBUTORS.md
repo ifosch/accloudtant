@@ -1,5 +1,6 @@
 # Accloudtant contributors (sorted alphabetically)
 
+- **[Daniel Abad](https://github.com/abadabanades)**
 - **[David Arcos](https://github.com/DZPM)**
 - **[Eduarco Bellido Bellido](https://github.com/edubxb)**
 - **[Ignasi Fosch](https://github.com/ifosch)**
@@ -9,4 +10,4 @@
 - **[Deepak Kumar Gupta](https://github.com/hellodk)**
 - **[Esteve Fernández](https://github.com/esteve)**
 - **[Jordi Soucheiron](https://github.com/jsoucheiron)**
-- **[Xavi Solé](https://github.com/xsb)**
+- **[Xavi Soler](https://github.com/xsb)**
