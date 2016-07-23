@@ -22,15 +22,15 @@ from accloudtant.aws.reserved_instance import ReservedInstance
 from accloudtant.aws.prices import Prices
 import sys
 
-
 class Reports(object):
-    def __init__(self, logger=None):
+    def __init__(self, output_format, logger=None):
         if logger is None:
             self.logger = getLogger('accloudtant.report')
             self.logger.setLevel(DEBUG)
             self.logger.addHandler(StreamHandler(sys.stdout))
         else:
             self.logger = logger
+        self.output_format=output_format
         ec2 = boto3.resource('ec2')
         ec2_client = boto3.client('ec2')
         self.counters = {
@@ -91,7 +91,7 @@ class Reports(object):
         reserved_counters['not reserved'] = instances_counters['running']
         reserved_counters['not reserved'] -= reserved_counters['used']
 
-    def __repr__(self):
+    def print_report(self):
         headers = [
             'Id',
             'Name',
@@ -119,24 +119,45 @@ class Reports(object):
                 instance.best,
             ]
             table.append(row)
-        footer_headers = [
-            'Running',
-            'Stopped',
-            'Total instances',
-            'Used',
-            'Free',
-            'Not reserved',
-            'Total reserved',
-        ]
-        footer_table = [[
-            self.counters['instances']['running'],
-            self.counters['instances']['stopped'],
-            self.counters['instances']['total'],
-            self.counters['reserved']['used'],
-            self.counters['reserved']['free'],
-            self.counters['reserved']['not reserved'],
-            self.counters['reserved']['total'],
-        ]]
-        inventory = tabulate(table, headers)
-        summary = tabulate(footer_table, footer_headers)
-        return "{}\n\n{}".format(inventory, summary)
+
+        if self.output_format == 'table':
+            footer_headers = [
+                'Running',
+                'Stopped',
+                'Total instances',
+                'Used',
+                'Free',
+                'Not reserved',
+                'Total reserved',
+            ]
+            footer_table = [[
+                self.counters['instances']['running'],
+                self.counters['instances']['stopped'],
+                self.counters['instances']['total'],
+                self.counters['reserved']['used'],
+                self.counters['reserved']['free'],
+                self.counters['reserved']['not reserved'],
+                self.counters['reserved']['total'],
+            ]]
+            inventory = tabulate(table, headers)
+            summary = tabulate(footer_table, footer_headers)
+
+            return "{}\n\n{}".format(inventory, summary)
+
+        elif self.output_format == 'csv':
+            output = ''
+            for header in headers:
+                output += header + ','
+            output = output[:-1] + '\n'
+            for row in table:
+                for column in row:
+                    output += str(column) + ','
+                output = output[:-1] + '\n'
+
+            return output[:-1]
+
+        else:
+            raise Exception()
+
+    def __repr__(self):
+        return self.print_report()
