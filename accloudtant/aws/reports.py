@@ -21,9 +21,13 @@ from accloudtant.aws.instance import Instance
 from accloudtant.aws.reserved_instance import ReservedInstance
 from accloudtant.aws.prices import Prices
 import sys
+import os
+import json
+import calendar
+import time
 
 class Reports(object):
-    def __init__(self, output_format, logger=None):
+    def __init__(self,output_format,region_name,save,logger=None):
         if logger is None:
             self.logger = getLogger('accloudtant.report')
             self.logger.setLevel(DEBUG)
@@ -31,6 +35,8 @@ class Reports(object):
         else:
             self.logger = logger
         self.output_format=output_format
+        self.save=save
+        #self.file_name=file_name
         ec2 = boto3.resource('ec2')
         ec2_client = boto3.client('ec2')
         self.counters = {
@@ -66,17 +72,30 @@ class Reports(object):
         except exceptions.NoCredentialsError:
             logger.error("Error: no AWS credentials found")
             sys.exit(1)
-        self.prices = Prices()
+        self.prices = Prices(output_format='table',region_name='',save='no')
         self.find_reserved_instance()
 
     def find_reserved_instance(self):
         for instance in self.instances:
             instance_region = self.prices.prices[instance.key][instance.region]
             instance_size = instance_region[instance.size]
-            instance.current = float(instance_size['od'])
+            try:
+                instance.current = float(instance_size['od'])
+            except KeyError:
+                continue
             if instance.state == 'stopped':
                 instance.current = 0.0
-            instance_all_upfront = instance_size['ri']['yrTerm3']['allUpfront']
+            try:
+                instance_all_upfront = instance_size['ri']['yrTerm3Standard']['allUpfront']
+                instance.best = float(instance_all_upfront['effectiveHourly'])
+                for reserved in self.reserved_instances:
+                    if instance.match_reserved_instance(reserved):
+                        instance.reserved = 'Yes'
+                        instance.current = reserved.usage_price
+                        reserved.link(instance)
+                        break
+            except KeyError:
+                continue
             instance.best = float(instance_all_upfront['effectiveHourly'])
             for reserved in self.reserved_instances:
                 if instance.match_reserved_instance(reserved):
@@ -88,11 +107,28 @@ class Reports(object):
                     break
         reserved_counters = self.counters['reserved']
         instances_counters = self.counters['instances']
-        reserved_counters['not reserved'] = instances_counters['running']
+        if instances_counters['total'] == 0:
+            reserved_counters['not reserved'] = 0
+        else:
+            reserved_counters['not reserved'] = instances_counters['running']
         reserved_counters['not reserved'] -= reserved_counters['used']
 
     def print_report(self):
         headers = [
+            'Region',
+            'Id',
+            'Name',
+            'Type',
+            'AZ',
+            'OS',
+            'State',
+            'Launch time',
+            'Reserved',
+            'Current\nhourly price',
+            'Renewed\nhourly price',
+        ]
+        other_format_headers = [
+            'Region',
             'Id',
             'Name',
             'Type',
@@ -107,6 +143,7 @@ class Reports(object):
         table = []
         for instance in self.instances:
             row = [
+                instance.region,
                 instance.id,
                 instance.name,
                 instance.size,
@@ -119,6 +156,12 @@ class Reports(object):
                 instance.best,
             ]
             table.append(row)
+        if len(table) == 0:
+            row = [os.environ['AWS_DEFAULT_REGION'],'NONE','NONE','NONE','NONE','NONE','NONE','NONE','NONE','NONE','NONE']
+            table.append(row)
+
+        if self.save != 'no':
+            time_now = calendar.timegm(time.gmtime())
 
         if self.output_format == 'table':
             footer_headers = [
@@ -130,31 +173,84 @@ class Reports(object):
                 'Not reserved',
                 'Total reserved',
             ]
+            instances_total = self.counters['instances']['total']
+            if instances_total == 0:
+                instances_running = 0
+                instances_stopped = 0
+            else:
+                instances_running = self.counters['instances']['running']
+                instances_stopped = self.counters['instances']['stopped']
             footer_table = [[
-                self.counters['instances']['running'],
-                self.counters['instances']['stopped'],
-                self.counters['instances']['total'],
+                instances_running,
+                instances_stopped,
+                instances_total,
                 self.counters['reserved']['used'],
                 self.counters['reserved']['free'],
                 self.counters['reserved']['not reserved'],
                 self.counters['reserved']['total'],
             ]]
-            inventory = tabulate(table, headers)
-            summary = tabulate(footer_table, footer_headers)
+            inventory = tabulate(table, headers,tablefmt="fancy_grid")
+            summary = tabulate(footer_table, footer_headers,tablefmt="fancy_grid")
+            output_message = inventory + "\n" + summary
+            if self.save != 'no':
+                print ('Please note table format will not be saved in any files')
+            return output_message
 
-            return "{}\n\n{}".format(inventory, summary)
 
         elif self.output_format == 'csv':
             output = ''
-            for header in headers:
+            for header in other_format_headers:
                 output += header + ','
             output = output[:-1] + '\n'
             for row in table:
                 for column in row:
                     output += str(column) + ','
                 output = output[:-1] + '\n'
-
+            if self.save != 'no':
+                output_file_name = self.save + "/accloudtant-report-" + str(time_now) + "-" + table[0][0] + ".csv"
+                output_file = open(output_file_name,'w')
+                output_file.write(output[:-1])
+                output_file.close()
+                print ('The output is saved in ' + output_file_name)
             return output[:-1]
+
+        elif self.output_format == 'json':
+            json_output = "[\n{\n"
+            region = table[0][0]
+            json_output += '"' + region + '":{\n' + '"Instances":[\n{\n'
+            number_rows = len(table)
+            number_columns = len(table[0])
+            row = 0
+            last_column = number_columns - 1
+            last_row = number_rows - 1
+            while row < number_rows:
+                col = 1
+                while col < number_columns:
+                    if col == 1:
+                        json_output += '"' + str(table[row][col]) + '":{\n'
+                        col += 1
+                        continue
+                    else:
+                        json_output += '"' + other_format_headers[col] + '" : '
+                    if col == last_column:
+                        json_output += '"' + str(table[row][col]) + '"\n}'
+                    else:
+                        json_output += '"' + str(table[row][col]) + '",\n'
+                    col += 1
+                if row == last_row:
+                    json_output += '\n}\n]\n}\n}\n]'
+                else:
+                    json_output += ",\n"
+                row += 1
+            json_output = json.loads(json_output)
+            json_pretty = json.dumps(json_output,indent=4, sort_keys=True)
+            if self.save != 'no':
+                output_file_name = self.save + "/accloudtant-report-" + str(time_now) + "-" + region + ".json"
+                output_file = open(output_file_name,'w')
+                output_file.write(json_pretty)
+                output_file.close()
+                print ('The output is saved in ' + output_file_name)
+            return json_pretty
 
         else:
             raise Exception()

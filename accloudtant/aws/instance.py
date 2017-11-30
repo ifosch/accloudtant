@@ -72,6 +72,26 @@ class Instance(object):
             return names[0]['Value']
 
     @property
+    def project(self):
+        projects = [tag for tag in self.tags if tag['Key'] == 'Project']
+        if len(projects) == 0:
+            return ''
+        else:
+            return projects[0]['Value']
+
+    @property
+    def environment_name(self):
+        tag = {}
+        try:
+            environments = [tag for tag in self.tags in tag['Key'] == 'Environment']
+            if len(environments) == 0:
+                return ''
+            else:
+                return environments[0]['Value']
+        except KeyError:
+            return ''
+        
+    @property
     def availability_zone(self):
         return self._placement['AvailabilityZone']
 
