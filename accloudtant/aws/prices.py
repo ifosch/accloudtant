@@ -21,32 +21,23 @@ import warnings
 import requests
 from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
-import pdb
-
+import json
+import calendar
+import time
 
 class Prices(object):
-    def __init__(self):
+    def __init__(self,output_format,region_name,save):
+        self.output_format=output_format
+        self.save=save
         with warnings.catch_warnings(record=True) as price_warnings:
-            ondemand_url = 'http://aws.amazon.com/ec2/pricing/on-demand'
-            #spot_url = 'https://aws.amazon.com/ec2/spot/pricing/'
-            reserved_url = 'https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/'
-            #dedicated_url = 'https://aws.amazon.com/ec2/dedicated-hosts/pricing/'
-            prev_url = 'http://aws.amazon.com/ec2/previous-generation/'
-            self.prices = process_ec2(ondemand_url)
-            #spot_prices = process_ec2(spot_url)
-            prices_reserv = process_ec2(reserved_url)
-            #dedicated_prices = process_ec2(dedicated_url)
+            curr_url = 'https://aws.amazon.com/ec2/pricing/on-demand/'
+            prev_url = 'https://aws.amazon.com/ec2/previous-generation/'
+            self.prices = process_ec2(curr_url)
             prices_prev = process_ec2(prev_url)
             for kind in self.prices:
-                #if kind in spot_prices:
-                #    self.update_region_prices(spot_prices, kind)
-                if kind in prices_reserv:
-                    self.update_region_prices(prices_reserv, kind)
-                #if kind in dedicated_prices:
-                #    self.update_region_prices(dedicated_prices, kind)
                 if kind in prices_prev:
                     self.update_region_prices(prices_prev, kind)
-            self.output = print_prices(self.prices)
+            self.output = print_prices(self.prices,self.output_format,self.save)
             for warning in price_warnings:
                 self.output += "\n{}".format(warning.message)
 
@@ -64,13 +55,15 @@ def eval_price_exists(price):
     return price or 'N/A'
 
 
-def print_prices(instances=None, region='us-east-1'):
+def print_prices(instances=None,output_format='table',save='no',region='us-east-1'):
     """ This function prints the results from the AWS EC2 pricing
         processing."""
     if 'AWS_DEFAULT_REGION' in environ:
         region = environ['AWS_DEFAULT_REGION']
+    if save != 'no':
+        time_now = calendar.timegm(time.gmtime())
     empty_ri = {
-        'yrTerm1': {
+        'yrTerm1Standard': {
             'noUpfront': {
                 'effectiveHourly': None,
             },
@@ -81,7 +74,7 @@ def print_prices(instances=None, region='us-east-1'):
                 'effectiveHourly': None,
             },
         },
-        'yrTerm3': {
+        'yrTerm3Standard': {
             'noUpfront': {
                 'effectiveHourly': None,
             },
@@ -93,8 +86,8 @@ def print_prices(instances=None, region='us-east-1'):
             },
         },
     }
-    empty_od = "None"
-    headers = ['Type',
+    headers = ['Region',
+               'Type',
                'On Demand',
                '1y No Upfront',
                '1y Partial Upfront',
@@ -105,38 +98,25 @@ def print_prices(instances=None, region='us-east-1'):
     for ec2_kind in ['linux']:
         for size in sorted(instances[ec2_kind][region].keys()):
             instance_size = instances[ec2_kind][region][size]
-            #pdb.set_trace()
-            on_demand = instance_size.get('od',empty_od)
-            #try:
+            on_demand = instance_size['od']
             reserved_prices = instance_size.get('ri', empty_ri)
-            #except KeyError:
-            try:
-                rsrvd_1yr = reserved_prices['yrTerm1Standard']
-                rsrvd_3yr = reserved_prices['yrTerm3Standard']
-                no_upfront = 'noUpfront'
-                partial_upfront = 'partialUpfront'
-                all_upfront = 'allUpfront'
-                hourly_price = rsrvd_1yr[no_upfront]['effectiveHourly']
-                no_upfront = eval_price_exists(hourly_price)
-                hourly_price = rsrvd_1yr[partial_upfront]['effectiveHourly']
-                partial_upfront_1yr = eval_price_exists(hourly_price)
-                hourly_price = rsrvd_1yr[all_upfront]['effectiveHourly']
-                all_upfront_1yr = eval_price_exists(hourly_price)
-                hourly_price = rsrvd_3yr[partial_upfront]['effectiveHourly']
-                partial_upfront_3yr = eval_price_exists(hourly_price)
-                hourly_price = rsrvd_3yr[all_upfront]['effectiveHourly']
-                all_upfront_3yr = eval_price_exists(hourly_price)
-            except KeyError:
-                no_upfront = 'noUpfront'
-                partial_upfront = 'partialUpfront'
-                all_upfront = 'allUpfront'
-                no_upfront = eval_price_exists(hourly_price)
-                partial_upfront_1yr = eval_price_exists(hourly_price)
-                all_upfront_1yr = eval_price_exists(hourly_price)
-                partial_upfront_3yr = eval_price_exists(hourly_price)
-                all_upfront_3yr = eval_price_exists(hourly_price)
-
-            row = [size,
+            rsrvd_1yr = reserved_prices['yrTerm1Standard']
+            rsrvd_3yr = reserved_prices['yrTerm3Standard']
+            no_upfront = 'noUpfront'
+            partial_upfront = 'partialUpfront'
+            all_upfront = 'allUpfront'
+            hourly_price = rsrvd_1yr[no_upfront]['effectiveHourly']
+            no_upfront = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_1yr[partial_upfront]['effectiveHourly']
+            partial_upfront_1yr = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_1yr[all_upfront]['effectiveHourly']
+            all_upfront_1yr = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_3yr[partial_upfront]['effectiveHourly']
+            partial_upfront_3yr = eval_price_exists(hourly_price)
+            hourly_price = rsrvd_3yr[all_upfront]['effectiveHourly']
+            all_upfront_3yr = eval_price_exists(hourly_price)
+            row = [region,
+                   size,
                    on_demand,
                    no_upfront,
                    partial_upfront_1yr,
@@ -144,9 +124,70 @@ def print_prices(instances=None, region='us-east-1'):
                    partial_upfront_3yr,
                    all_upfront_3yr]
             table.append(row)
-    output = "EC2 (Hourly prices, no upfronts, no instance type features):\n"
-    output += tabulate(table, headers)
-    return output
+        if output_format == 'table':
+            output = "EC2 (Hourly prices, no upfronts, no instance type features):\n"
+            output += tabulate(table, headers,tablefmt="fancy_grid")
+            if save != 'no':
+                print ('Please note table format will not be saved in any files')
+            return output
+
+        elif output_format == 'csv':
+            output = ''
+            for header in headers:
+                output += header + ','
+            output = output[:-1] + '\n'
+            for row in table:
+                for column in row:
+                    output += str(column) + ','
+                output = output[:-1] + '\n'
+            if save != 'no':
+                output_file_name = save + "/accloudtant-list-" + str(time_now) + "-" + region + ".csv"
+                output_file = open(output_file_name,'w')
+                output_file.write(output[:-1])
+                output_file.close()
+                print ('The output is saved in ' + output_file_name)
+            return output[:-1]
+
+        elif output_format == 'json':
+            json_output = "[\n{\n"
+            region = table[0][0]
+            json_output += '"' + region + '":{\n' + '"Instances":[\n{\n'
+            number_rows = len(table)
+            number_columns = len(table[0])
+            row = 0
+            last_column = number_columns - 1
+            last_row = number_rows - 1
+            while row < number_rows:
+                col = 1
+                while col < number_columns:
+                    if col == 1:
+                        json_output += '"' + str(table[row][col]) + '":{\n'
+                        col += 1
+                        continue
+                    else:
+                        json_output += '"' + headers[col] + '" : '
+                    if col == last_column:
+                        json_output += '"' + str(table[row][col]) + '"\n}'
+                    else:
+                        json_output += '"' + str(table[row][col]) + '",\n'
+                    col += 1
+                if row == last_row:
+                    json_output += '\n}\n]\n}\n}\n]'
+                else:
+                    json_output += ",\n"
+                row += 1
+            json_output = json.loads(json_output)
+            json_pretty = json.dumps(json_output,indent=4, sort_keys=True)
+            if save != 'no':
+                output_file_name = save + "/accloudtant-list-" + str(time_now) + "-" + region + ".json"
+                output_file = open(output_file_name,'w')
+                output_file.write(json_pretty)
+                output_file.close()
+                print ('The output is saved in ' + output_file_name)
+            return json_pretty
+
+    else:
+        raise Exception()
 
 
 def process_ec2(url):
@@ -155,7 +196,7 @@ def process_ec2(url):
     """
     instances = {}
     pricings = requests.get(url)
-    for html_line in io.StringIO(pricings.text):
+    for html_line in io.StringIO(pricings.content.decode("utf-8")):
         if 'model:' in html_line:
             url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())
             instances = process_model(url, instances)
@@ -171,7 +212,8 @@ def process_model(url, instances=None):
         instances = {}
     js_name = url.split('/')[-1]
     pricing = requests.get(url)
-    for js_line in io.StringIO(pricing.text.replace("\n", "")):
+    content = pricing.content.decode("utf-8").replace("\n", "")
+    for js_line in io.StringIO(content):
         if 'callback' in js_line:
             data = fix_lazy_json(re.sub(r".*callback\((.+)\).*",
                                         r"\1", js_line))

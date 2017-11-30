@@ -1,28 +1,57 @@
-#!/usr/bin/env python
+#!/Users/arun.jayanth/anaconda2/bin/python
 import click
 import sys
 from logging import getLogger, StreamHandler, DEBUG
 from accloudtant.aws.prices import Prices
 from accloudtant.aws.reports import Reports
+import os
+from bs4 import BeautifulSoup
+import requests
 
 
 logger = getLogger('accloudtant')
 logger.setLevel(DEBUG)
 logger.addHandler(StreamHandler(sys.stdout))
 
+regions = ['us-east-1','us-east-2','us-west-1','us-west-2','ca-central-1','eu-west-1','eu-central-1','eu-west-2','ap-northeast-1','ap-northeast-2','ap-southeast-1','ap-southeast-2','ap-south-1','sa-east-1']
+try:
+    current_aws_region = os.environ['AWS_DEFAULT_REGION']
+except KeyError:
+    current_aws_region ='us-east-1'
+save = 'no'
 @click.group()
 def cli():
     pass
 
 @cli.command('list', short_help='prints current price lists')
-def price_list():
-    logger.info(Prices())
+@click.option('--output', default='table', type=click.Choice(['table','csv','json']),
+              help='Change output format')
+@click.option('--location', default='us-east-1', multiple=True,  type=click.Choice(regions),help='Specify multiple regions separated by space')
+@click.option('--save', default='no',help='Specify the directory to save')
+def price_list(output,location,save):
+    for region_name in location:
+        os.environ['AWS_DEFAULT_REGION'] = region_name
+        if save != 'no':
+            if not os.path.exists(save):
+                os.makedirs(save)
+        logger.info(Prices(output_format=output,region_name=region_name,save=save))
+    os.environ['AWS_DEFAULT_REGION'] = current_aws_region
+
 
 @cli.command(short_help='provides price/usage reports')
-@click.option('--output', default='table', type=click.Choice(['table', 'csv']),
+@click.option('--output', default='table', type=click.Choice(['table', 'csv','json']),
               help='Change output format')
-def report(output):
-    logger.info(Reports(output_format=output))
+@click.option('--location', default="us-east-1", multiple=True, type=click.Choice(regions),help='Specify multiple regions separated by comma')
+@click.option('--save', default='no',help='Specify the directory to save')
+def report(output,location,save):
+    for region_name in location:
+        os.environ['AWS_DEFAULT_REGION'] = region_name
+        if save != 'no':
+            if not os.path.exists(save):
+                os.makedirs(save)
+        logger.info(Reports(output_format=output,region_name=region_name,save=save))
+    os.environ['AWS_DEFAULT_REGION'] = current_aws_region
+
 
 if __name__ == '__main__':
     cli()
