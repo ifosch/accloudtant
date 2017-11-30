@@ -21,16 +21,29 @@ import warnings
 import requests
 from tabulate import tabulate
 from accloudtant.utils import fix_lazy_json
+import pdb
 
 
 class Prices(object):
     def __init__(self):
         with warnings.catch_warnings(record=True) as price_warnings:
-            curr_url = 'http://aws.amazon.com/ec2/pricing/'
+            ondemand_url = 'http://aws.amazon.com/ec2/pricing/on-demand'
+            #spot_url = 'https://aws.amazon.com/ec2/spot/pricing/'
+            reserved_url = 'https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/'
+            #dedicated_url = 'https://aws.amazon.com/ec2/dedicated-hosts/pricing/'
             prev_url = 'http://aws.amazon.com/ec2/previous-generation/'
-            self.prices = process_ec2(curr_url)
+            self.prices = process_ec2(ondemand_url)
+            #spot_prices = process_ec2(spot_url)
+            prices_reserv = process_ec2(reserved_url)
+            #dedicated_prices = process_ec2(dedicated_url)
             prices_prev = process_ec2(prev_url)
             for kind in self.prices:
+                #if kind in spot_prices:
+                #    self.update_region_prices(spot_prices, kind)
+                if kind in prices_reserv:
+                    self.update_region_prices(prices_reserv, kind)
+                #if kind in dedicated_prices:
+                #    self.update_region_prices(dedicated_prices, kind)
                 if kind in prices_prev:
                     self.update_region_prices(prices_prev, kind)
             self.output = print_prices(self.prices)
@@ -80,6 +93,7 @@ def print_prices(instances=None, region='us-east-1'):
             },
         },
     }
+    empty_od = "None"
     headers = ['Type',
                'On Demand',
                '1y No Upfront',
@@ -91,23 +105,37 @@ def print_prices(instances=None, region='us-east-1'):
     for ec2_kind in ['linux']:
         for size in sorted(instances[ec2_kind][region].keys()):
             instance_size = instances[ec2_kind][region][size]
-            on_demand = instance_size['od']
+            #pdb.set_trace()
+            on_demand = instance_size.get('od',empty_od)
+            #try:
             reserved_prices = instance_size.get('ri', empty_ri)
-            rsrvd_1yr = reserved_prices['yrTerm1']
-            rsrvd_3yr = reserved_prices['yrTerm3']
-            no_upfront = 'noUpfront'
-            partial_upfront = 'partialUpfront'
-            all_upfront = 'allUpfront'
-            hourly_price = rsrvd_1yr[no_upfront]['effectiveHourly']
-            no_upfront = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_1yr[partial_upfront]['effectiveHourly']
-            partial_upfront_1yr = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_1yr[all_upfront]['effectiveHourly']
-            all_upfront_1yr = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_3yr[partial_upfront]['effectiveHourly']
-            partial_upfront_3yr = eval_price_exists(hourly_price)
-            hourly_price = rsrvd_3yr[all_upfront]['effectiveHourly']
-            all_upfront_3yr = eval_price_exists(hourly_price)
+            #except KeyError:
+            try:
+                rsrvd_1yr = reserved_prices['yrTerm1Standard']
+                rsrvd_3yr = reserved_prices['yrTerm3Standard']
+                no_upfront = 'noUpfront'
+                partial_upfront = 'partialUpfront'
+                all_upfront = 'allUpfront'
+                hourly_price = rsrvd_1yr[no_upfront]['effectiveHourly']
+                no_upfront = eval_price_exists(hourly_price)
+                hourly_price = rsrvd_1yr[partial_upfront]['effectiveHourly']
+                partial_upfront_1yr = eval_price_exists(hourly_price)
+                hourly_price = rsrvd_1yr[all_upfront]['effectiveHourly']
+                all_upfront_1yr = eval_price_exists(hourly_price)
+                hourly_price = rsrvd_3yr[partial_upfront]['effectiveHourly']
+                partial_upfront_3yr = eval_price_exists(hourly_price)
+                hourly_price = rsrvd_3yr[all_upfront]['effectiveHourly']
+                all_upfront_3yr = eval_price_exists(hourly_price)
+            except KeyError:
+                no_upfront = 'noUpfront'
+                partial_upfront = 'partialUpfront'
+                all_upfront = 'allUpfront'
+                no_upfront = eval_price_exists(hourly_price)
+                partial_upfront_1yr = eval_price_exists(hourly_price)
+                all_upfront_1yr = eval_price_exists(hourly_price)
+                partial_upfront_3yr = eval_price_exists(hourly_price)
+                all_upfront_3yr = eval_price_exists(hourly_price)
+
             row = [size,
                    on_demand,
                    no_upfront,
@@ -127,7 +155,7 @@ def process_ec2(url):
     """
     instances = {}
     pricings = requests.get(url)
-    for html_line in io.StringIO(pricings.content.decode("utf-8")):
+    for html_line in io.StringIO(pricings.text):
         if 'model:' in html_line:
             url = re.sub(r".+'(.+)'.*", r"http:\1", html_line.strip())
             instances = process_model(url, instances)
@@ -143,8 +171,7 @@ def process_model(url, instances=None):
         instances = {}
     js_name = url.split('/')[-1]
     pricing = requests.get(url)
-    content = pricing.content.decode("utf-8").replace("\n", "")
-    for js_line in io.StringIO(content):
+    for js_line in io.StringIO(pricing.text.replace("\n", "")):
         if 'callback' in js_line:
             data = fix_lazy_json(re.sub(r".*callback\((.+)\).*",
                                         r"\1", js_line))
