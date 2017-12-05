@@ -1310,7 +1310,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
         )
     process_ec2.set_responses(result)
 
-    prices = accloudtant.aws.prices.Prices()
+    prices = accloudtant.aws.prices.Prices(output_format='table',region_name='us-east-1',save='no')
     print(accloudtant.aws.prices.print_prices(result))
     out, err = capsys.readouterr()
     print(prices)
@@ -1606,7 +1606,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
         )
     process_ec2.set_responses(result, ['Unknown'])
 
-    prices = accloudtant.aws.prices.Prices()
+    prices = accloudtant.aws.prices.Prices(output_format='table',region_name='us-east-1',save='no')
     print(prices)
     out, err = capsys.readouterr()
 

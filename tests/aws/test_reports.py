@@ -633,7 +633,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
         )
     process_ec2.set_responses(prices)
 
-    reports = accloudtant.aws.reports.Reports(output_format='table')
+    reports = accloudtant.aws.reports.Reports(output_format='table',region_name='us-east-1',save='no')
     print(reports)
     out, err = capsys.readouterr()
 
@@ -1260,7 +1260,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
         )
     process_ec2.set_responses(prices)
 
-    reports = accloudtant.aws.reports.Reports(output_format='csv')
+    reports = accloudtant.aws.reports.Reports(output_format='table',region_name='us-east-1',save='no')
     print(reports)
     out, err = capsys.readouterr()
 
