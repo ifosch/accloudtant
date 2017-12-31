@@ -4,3 +4,4 @@ accloudtant.egg-info/*
 README
 dist/*
 __pycache__/
+**/*.pyc
