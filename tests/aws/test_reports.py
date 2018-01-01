@@ -394,7 +394,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -411,7 +411,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5021',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -435,7 +435,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                 'r2.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -452,7 +452,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10233.432',
                                 'monthlyStar': '0',
@@ -476,7 +476,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                 'r2.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -493,7 +493,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -517,7 +517,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                 't1.micro': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -534,7 +534,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -554,7 +554,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                 'r2.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -571,7 +571,7 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1021,7 +1021,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1038,7 +1038,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5021',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1062,7 +1062,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                 'r2.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1079,7 +1079,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10233.432',
                                 'monthlyStar': '0',
@@ -1103,7 +1103,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                 'r2.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1120,7 +1120,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1144,7 +1144,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                 't1.micro': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1161,7 +1161,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1181,7 +1181,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                 'r2.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1198,7 +1198,7 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                                 'effectiveHourly': '0.5121',
                             },
                         },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
