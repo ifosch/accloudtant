@@ -98,7 +98,10 @@ class Instance(object):
            reserved.instances_left == 0 or
            reserved.product_description != self.operating_system or
            reserved.instance_type != self.size or
-           reserved.az != self.availability_zone
+           (
+               reserved.scope == 'Availability Zone' and
+               reserved.az != self.availability_zone
+           )
         )
 
 
