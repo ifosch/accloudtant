@@ -27,17 +27,29 @@ class Prices(object):
     def __init__(self):
         with warnings.catch_warnings(record=True) as price_warnings:
             curr_url = 'https://aws.amazon.com/ec2/pricing/on-demand/'
+            curr_ri_url = 'https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/'
             prev_url = 'https://aws.amazon.com/ec2/previous-generation/'
             self.prices = process_ec2(curr_url)
+            prices_curr_ri = process_ec2(curr_ri_url)
             prices_prev = process_ec2(prev_url)
             for kind in self.prices:
                 if kind in prices_prev:
-                    self.update_region_prices(prices_prev, kind)
+                    self.update_previous_generation_prices(prices_prev, kind)
+                if kind in prices_curr_ri:
+                    self.update_ri_prices(prices_curr_ri, kind)
             self.output = print_prices(self.prices)
             for warning in price_warnings:
                 self.output += "\n{}".format(warning.message)
 
-    def update_region_prices(self, prices_prev, kind):
+    def update_ri_prices(self, prices_curr_ri, kind):
+        for region in self.prices[kind]:
+            if region in prices_curr_ri[kind]:
+                for instance_type in self.prices[kind][region]:
+                    if instance_type in prices_curr_ri[kind][region]:
+                        if 'ri' in prices_curr_ri[kind][region][instance_type]:
+                            self.prices[kind][region][instance_type]['ri'] = prices_curr_ri[kind][region][instance_type]['ri']
+
+    def update_previous_generation_prices(self, prices_prev, kind):
         for region in self.prices[kind]:
             region_prices = self.prices[kind][region]
             if region in prices_prev[kind]:
@@ -91,7 +103,7 @@ def print_prices(instances=None, region='us-east-1'):
     for ec2_kind in ['linux']:
         for size in sorted(instances[ec2_kind][region].keys()):
             instance_size = instances[ec2_kind][region][size]
-            on_demand = instance_size['od']
+            on_demand = instance_size.get('od', {})
             reserved_prices = instance_size.get('ri', empty_ri)
             rsrvd_1yr = reserved_prices['yrTerm1Standard']
             rsrvd_3yr = reserved_prices['yrTerm3Standard']
