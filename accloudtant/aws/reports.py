@@ -76,7 +76,12 @@ class Reports(object):
             instance.current = float(instance_size['od'])
             if instance.state == 'stopped':
                 instance.current = 0.0
-            instance_all_upfront = instance_size['ri']['yrTerm3']['allUpfront']
+            try:
+                instance_all_upfront = instance_size['ri']['yrTerm3Standard']['allUpfront']
+            except KeyError:
+                instance_all_upfront = {
+                    'effectiveHourly': 0.0,
+                }
             instance.best = float(instance_all_upfront['effectiveHourly'])
             for reserved in self.reserved_instances:
                 if instance.match_reserved_instance(reserved):

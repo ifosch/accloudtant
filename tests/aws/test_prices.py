@@ -208,7 +208,7 @@ def check_reserved_regions(instance_kinds):
             instance_size = instance_kinds[region]['t2.micro']
             assert('ri' in instance_size)
             instance_reserved = instance_size['ri']
-            terms = ['yrTerm1', 'yrTerm3']
+            terms = ['yrTerm1Standard', 'yrTerm3Standard']
             assert(term in instance_reserved for term in terms)
             for term in terms:
                 for purchase_opt in ['partialUpfront', 'allUpfront']:
@@ -217,8 +217,8 @@ def check_reserved_regions(instance_kinds):
                     assert('upfront' in purchase_parts)
                     assert('monthlyStar' in purchase_parts)
                     assert('effectiveHourly' in purchase_parts)
-            assert('noUpfront' in instance_reserved['yrTerm1'])
-            no_upfront = instance_reserved['yrTerm1']['noUpfront']
+            assert('noUpfront' in instance_reserved['yrTerm1Standard'])
+            no_upfront = instance_reserved['yrTerm1Standard']['noUpfront']
             assert(no_upfront['upfront'] == '0')
             assert(no_upfront['monthlyStar'] == '6.57')
             assert(no_upfront['effectiveHourly'] == '0.009')
@@ -235,7 +235,7 @@ def test_process_reserved(monkeypatch, mock_process_generic):
                 'instanceTypes': [{
                   'type': 't2.micro',
                   'terms': [{
-                      'term': 'yrTerm1',
+                      'term': 'yrTerm1Standard',
                       'purchaseOptions': [{
                           'purchaseOption': 'noUpfront',
                           'savingsOverOD': '31%',
@@ -277,7 +277,7 @@ def test_process_reserved(monkeypatch, mock_process_generic):
                               }, ],
                           }, ]
                       }, {
-                      'term': 'yrTerm3',
+                      'term': 'yrTerm3Standard',
                       'purchaseOptions': [{
                           'purchaseOption': 'partialUpfront',
                           'savingsOverOD': '53%',
@@ -312,7 +312,7 @@ def test_process_reserved(monkeypatch, mock_process_generic):
                 'instanceTypes': [{
                   'type': 't2.micro',
                   'terms': [{
-                      'term': 'yrTerm1',
+                      'term': 'yrTerm1Standard',
                       'purchaseOptions': [{
                           'purchaseOption': 'noUpfront',
                           'savingsOverOD': '31%',
@@ -354,7 +354,7 @@ def test_process_reserved(monkeypatch, mock_process_generic):
                               }, ],
                           }, ]
                       }, {
-                      'term': 'yrTerm3',
+                      'term': 'yrTerm3Standard',
                       'purchaseOptions': [{
                           'purchaseOption': 'partialUpfront',
                           'savingsOverOD': '53%',
@@ -868,7 +868,7 @@ def test_print_prices(capsys):
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -885,7 +885,7 @@ def test_print_prices(capsys):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -905,7 +905,7 @@ def test_print_prices(capsys):
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -922,7 +922,7 @@ def test_print_prices(capsys):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -944,7 +944,7 @@ def test_print_prices(capsys):
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -961,7 +961,7 @@ def test_print_prices(capsys):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -981,7 +981,7 @@ def test_print_prices(capsys):
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -998,7 +998,7 @@ def test_print_prices(capsys):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1152,7 +1152,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1169,7 +1169,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1189,7 +1189,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1206,7 +1206,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1228,7 +1228,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1245,7 +1245,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1265,7 +1265,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1282,7 +1282,7 @@ def test_prices(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1448,7 +1448,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1465,7 +1465,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1485,7 +1485,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1502,7 +1502,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1524,7 +1524,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                 'g2.2xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1541,7 +1541,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',
@@ -1561,7 +1561,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                 'c3.8xlarge': {
                     'storageGB': '60 SSD',
                     'ri': {
-                        'yrTerm1': {
+                        'yrTerm1Standard': {
                             'noUpfront': {
                                 'upfront': '0',
                                 'monthlyStar': '446.03',
@@ -1578,7 +1578,7 @@ def test_prices_with_warning(capsys, monkeypatch, process_ec2):
                                 'effectiveHourly': '0.5121',
                                 },
                             },
-                        'yrTerm3': {
+                        'yrTerm3Standard': {
                             'allUpfront': {
                                 'upfront': '10234',
                                 'monthlyStar': '0',

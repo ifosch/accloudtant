@@ -26,8 +26,8 @@ from accloudtant.utils import fix_lazy_json
 class Prices(object):
     def __init__(self):
         with warnings.catch_warnings(record=True) as price_warnings:
-            curr_url = 'http://aws.amazon.com/ec2/pricing/'
-            prev_url = 'http://aws.amazon.com/ec2/previous-generation/'
+            curr_url = 'https://aws.amazon.com/ec2/pricing/on-demand/'
+            prev_url = 'https://aws.amazon.com/ec2/previous-generation/'
             self.prices = process_ec2(curr_url)
             prices_prev = process_ec2(prev_url)
             for kind in self.prices:
@@ -57,7 +57,7 @@ def print_prices(instances=None, region='us-east-1'):
     if 'AWS_DEFAULT_REGION' in environ:
         region = environ['AWS_DEFAULT_REGION']
     empty_ri = {
-        'yrTerm1': {
+        'yrTerm1Standard': {
             'noUpfront': {
                 'effectiveHourly': None,
             },
@@ -68,7 +68,7 @@ def print_prices(instances=None, region='us-east-1'):
                 'effectiveHourly': None,
             },
         },
-        'yrTerm3': {
+        'yrTerm3Standard': {
             'noUpfront': {
                 'effectiveHourly': None,
             },
@@ -93,8 +93,8 @@ def print_prices(instances=None, region='us-east-1'):
             instance_size = instances[ec2_kind][region][size]
             on_demand = instance_size['od']
             reserved_prices = instance_size.get('ri', empty_ri)
-            rsrvd_1yr = reserved_prices['yrTerm1']
-            rsrvd_3yr = reserved_prices['yrTerm3']
+            rsrvd_1yr = reserved_prices['yrTerm1Standard']
+            rsrvd_3yr = reserved_prices['yrTerm3Standard']
             no_upfront = 'noUpfront'
             partial_upfront = 'partialUpfront'
             all_upfront = 'allUpfront'
@@ -286,9 +286,9 @@ def process_data_transfer(data, js_name, instances=None):
         region = region_data['region']
         init_region(instances[generic['kind']], region)
         section = instances[generic['kind']][region]
-        section['regional'] = region_data['regionalDataTransfer']
-        section['ELB'] = region_data['elasticLBDataTransfer']
-        section['AZ'] = region_data['azDataTransfer']
+        section['regional'] = region_data.get('regionalDataTransfer', {})
+        section['ELB'] = region_data.get('elasticLBDataTransfer', {})
+        section['AZ'] = region_data.get('azDataTransfer', {})
         process_data_xfer_types(region_data['types'], section)
     return instances
 
