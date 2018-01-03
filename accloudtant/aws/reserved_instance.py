@@ -27,6 +27,10 @@ class ReservedInstance(object):
         return self.reserved_instance['ReservedInstancesId']
 
     @property
+    def scope(self):
+        return self.reserved_instance['Scope']
+
+    @property
     def az(self):
         return self.reserved_instance['AvailabilityZone']
 

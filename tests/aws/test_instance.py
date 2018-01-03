@@ -291,6 +291,7 @@ def test_match_reserved_instance(benchmark):
         'OfferingType': 'Medium Utilization',
         'ReservedInstancesId': '46a408c7-c33d-422d-af59-28df12233321',
         'FixedPrice': 910.0,
+        'Scope': 'Availability Zone',
         'AvailabilityZone': 'us-east-1b',
         'UsagePrice': 0.12,
         'Duration': 31536000,
