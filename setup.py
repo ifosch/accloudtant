@@ -16,12 +16,12 @@ from setuptools import setup, find_packages
 setup(
     name='accloudtant',
     packages=find_packages(),
-    version='0.1.3',
+    version='0.1.4',
     description='Cloud cost calculation tool',
     author='Ignasi Fosch, Eduardo Bellido Bellido, David Arcos',
     author_email='accloudtant@y10k.ws',
     url='https://github.com/ifosch/accloudtant',
-    download_url='https://github.com/ifosch/accloudtant/archive/0.1.3',
+    download_url='https://github.com/ifosch/accloudtant/archive/0.1.4',
     keywords=['cloud', 'AWS', 'costs'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',

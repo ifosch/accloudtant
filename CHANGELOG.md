@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file following [Keep a changelog](https://github.com/olivierlacan/keep-a-changelog) project as a guideline.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.1.4] - 0.1.4
+### Fixed
+- Fixes relocation of AWS prices web.
+- Fixes bug when loading region scoped RIs.
+
 ## [0.1.3] - 0.1.3
 ### Fixed
 - Supports instances without `Name` tag.
