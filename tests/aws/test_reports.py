@@ -20,6 +20,7 @@ import accloudtant.aws.reports
 def get_future_date(years=1):
     return datetime.datetime.now() + datetime.timedelta(years)
 
+
 def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                        process_ec2):
     instances = {
@@ -654,8 +655,14 @@ def test_reports_table(capsys, monkeypatch, ec2_resource, ec2_client,
                 assert(instance.best == mock['best'])
     assert(out == expected)
 
-def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
-                       process_ec2):
+
+def test_reports_csv(
+        capsys,
+        monkeypatch,
+        ec2_resource,
+        ec2_client,
+        process_ec2,
+):
     instances = {
         'instances': [{
             'id': 'i-912a4392',
@@ -1287,4 +1294,3 @@ def test_reports_csv(capsys, monkeypatch, ec2_resource, ec2_client,
                 assert(instance.current == mock['current'])
                 assert(instance.best == mock['best'])
     assert(out == expected)
-

@@ -26,9 +26,12 @@ from accloudtant.utils import fix_lazy_json
 class Prices(object):
     def __init__(self):
         with warnings.catch_warnings(record=True) as price_warnings:
-            curr_url = 'https://aws.amazon.com/ec2/pricing/on-demand/'
-            curr_ri_url = 'https://aws.amazon.com/ec2/pricing/reserved-instances/pricing/'
-            prev_url = 'https://aws.amazon.com/ec2/previous-generation/'
+            base_url = 'https://aws.amazon.com/ec2/'
+            curr_url = '{}pricing/on-demand/'.format(base_url)
+            curr_ri_url = '{}pricing/reserved-instances/pricing/'.format(
+                base_url
+            )
+            prev_url = '{}previous-generation/'.format(base_url)
             self.prices = process_ec2(curr_url)
             prices_curr_ri = process_ec2(curr_ri_url)
             prices_prev = process_ec2(prev_url)
@@ -41,13 +44,40 @@ class Prices(object):
             for warning in price_warnings:
                 self.output += "\n{}".format(warning.message)
 
-    def update_ri_prices(self, prices_curr_ri, kind):
+    def update_ri_prices(self, prices_ri, kind):
+        empty_ri = {
+            'yrTerm1Standard': {
+                'noUpfront': {
+                    'effectiveHourly': None,
+                },
+                'partialUpfront': {
+                    'effectiveHourly': None,
+                },
+                'allUpfront': {
+                    'effectiveHourly': None,
+                },
+            },
+            'yrTerm3Standard': {
+                'noUpfront': {
+                    'effectiveHourly': None,
+                },
+                'partialUpfront': {
+                    'effectiveHourly': None,
+                },
+                'allUpfront': {
+                    'effectiveHourly': None,
+                },
+            },
+        }
         for region in self.prices[kind]:
-            if region in prices_curr_ri[kind]:
-                for instance_type in self.prices[kind][region]:
-                    if instance_type in prices_curr_ri[kind][region]:
-                        if 'ri' in prices_curr_ri[kind][region][instance_type]:
-                            self.prices[kind][region][instance_type]['ri'] = prices_curr_ri[kind][region][instance_type]['ri']
+            for instance_type in self.prices[kind][region]:
+                local_prices = self.prices[kind][region][instance_type]
+                ri_type = prices_ri[kind][region].get(
+                    instance_type,
+                    {'ri': empty_ri},
+                )
+                if 'ri' in ri_type:
+                    local_prices['ri'] = ri_type['ri']
 
     def update_previous_generation_prices(self, prices_prev, kind):
         for region in self.prices[kind]:
@@ -350,6 +380,7 @@ def process_not_implemented(data, js_name, instances=None):
     warnings.warn("WARN: Parser not implemented for {}".format(
         generic['name']))
     return instances
+
 
 SECTION_NAMES = {
     'linux-od.min.js': {

@@ -22,6 +22,7 @@ from accloudtant.aws.reserved_instance import ReservedInstance
 from accloudtant.aws.prices import Prices
 import sys
 
+
 class Reports(object):
     def __init__(self, output_format, logger=None):
         if logger is None:
@@ -30,7 +31,7 @@ class Reports(object):
             self.logger.addHandler(StreamHandler(sys.stdout))
         else:
             self.logger = logger
-        self.output_format=output_format
+        self.output_format = output_format
         ec2 = boto3.resource('ec2')
         ec2_client = boto3.client('ec2')
         self.counters = {
@@ -77,12 +78,16 @@ class Reports(object):
             if instance.state == 'stopped':
                 instance.current = 0.0
             try:
-                instance_all_upfront = instance_size['ri']['yrTerm3Standard']['allUpfront']
+                ri_price = instance_size['ri']['yrTerm3Standard']['allUpfront']
+                instance_all_upfront = ri_price
             except KeyError:
                 instance_all_upfront = {
                     'effectiveHourly': 0.0,
                 }
-            instance.best = float(instance_all_upfront['effectiveHourly'])
+            if instance_all_upfront['effectiveHourly'] is None:
+                instance.best = 'N/A'
+            else:
+                instance.best = float(instance_all_upfront['effectiveHourly'])
             for reserved in self.reserved_instances:
                 if instance.match_reserved_instance(reserved):
                     instance.reserved = 'Yes'
