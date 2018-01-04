@@ -3,17 +3,9 @@ python:
   - "3.4"
   - "2.7"
 sudo: false
+install:
+  - pip install -r requirements-${TRAVIS_PYTHON_VERSION}.txt
 before_script:
-  - export PYTHON_MAJOR=$(echo ${TRAVIS_PYTHON_VERSION} | cut -d. -f1)
-  - wget https://repo.continuum.io/miniconda/Miniconda${PYTHON_MAJOR}-latest-Linux-x86_64.sh -O miniconda.sh
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
-  - conda env create -f environment-${PYTHON_MAJOR}.yml
-  - source activate accloudtant
   - python setup.py develop
 
 script: py.test
