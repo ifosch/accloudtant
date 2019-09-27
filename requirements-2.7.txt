@@ -23,7 +23,7 @@ pycodestyle==2.3.1
 pytest==3.3.1
 pytest-benchmark==3.1.1
 python-dateutil==2.6.1
-PyYAML==3.12
+PyYAML==5.1
 requests==2.8.1
 rsa==3.4.2
 s3transfer==0.1.12
