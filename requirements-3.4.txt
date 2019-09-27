@@ -14,6 +14,6 @@ pycodestyle==2.3.1
 pytest==3.3.1
 pytest-benchmark==3.1.1
 python-dateutil==2.6.1
-requests==2.8.1
+requests==2.20.0
 six==1.11.0
 tabulate==0.7.5
