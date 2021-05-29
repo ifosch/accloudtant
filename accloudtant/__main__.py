@@ -1,6 +1,11 @@
 import csv
 
 
+def area(entry):
+    if entry[" UsageType"].startswith("EUC1-"):
+        return "EU (Frankfurt)"
+
+
 if __name__ == "__main__":
     usage = []
 
@@ -10,5 +15,5 @@ if __name__ == "__main__":
             usage.append(row)
 
     print("Simple Storage Service")
-    for entry in usage:
-        print(entry)
+    for area_name in set([area(entry) for entry in usage]):
+        print("\t", area_name)
