@@ -1,6 +1,14 @@
 import csv
 
 
+class UsageRecord(object):
+    def __init__(self, data):
+        self._data = data
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+
 def area(entry):
     if entry[" UsageType"].startswith("EUC1-"):
         return "EU (Frankfurt)"
@@ -73,9 +81,10 @@ if __name__ == "__main__":
     with open("tests/fixtures/2021/03/S3.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            usage.append(row)
-            if area(row) is not None:
-                resource_areas[row[" Resource"]] = area(row)
+            entry = UsageRecord(row)
+            usage.append(entry)
+            if area(entry) is not None:
+                resource_areas[entry[" Resource"]] = area(entry)
 
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
