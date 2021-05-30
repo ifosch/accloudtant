@@ -49,19 +49,32 @@ class UsageRecords(object):
         return concepts.items()
 
     def total(self):
+        total_calc = default_total_calc
         if self._data[0].type.endswith("ByteHrs"):
-            totals = {}
-            for entry in self._data:
-                if entry.value not in totals:
-                    totals[entry.value] = []
-                totals[entry.value].append(entry)
-            total = 0
-            for value, values in totals.items():
-                total += int(value) * len(values) / 24
-            return total / 1073741824 / len(self._data)
+            total_calc = bytehrs_total_calc
         elif self._data[0].type.endswith("Bytes"):
-            return sum([int(entry.value) for entry in self._data]) / 1073741824
-        return sum([int(entry.value) for entry in self._data])
+            total_calc = bytes_total_calc
+        return total_calc(self._data)
+
+
+def default_total_calc(values):
+    return sum([int(entry.value) for entry in values])
+
+
+def bytes_total_calc(values):
+    return default_total_calc(values) / 1073741824
+
+
+def bytehrs_total_calc(values):
+    totals = {}
+    for entry in values:
+        if entry.value not in totals:
+            totals[entry.value] = []
+        totals[entry.value].append(entry)
+    total = 0
+    for value, vs in totals.items():
+        total += int(value) * len(vs) / 24
+    return total / 1073741824 / len(values)
 
 
 def unit(concept):
