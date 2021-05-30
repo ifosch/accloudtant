@@ -6,6 +6,18 @@ def area(entry):
         return "EU (Frankfurt)"
 
 
+def get_areas(entries):
+    areas = {}
+
+    for entry in entries:
+        area_name = area(entry)
+        if area_name not in areas:
+            areas[area_name] = []
+        areas[area_name].append(entry)
+
+    return areas
+
+
 if __name__ == "__main__":
     usage = []
 
@@ -15,5 +27,7 @@ if __name__ == "__main__":
             usage.append(row)
 
     print("Simple Storage Service")
-    for area_name in set([area(entry) for entry in usage]):
+    for area_name, entries in get_areas(usage).items():
         print("\t", area_name)
+        for concept in set([entry[" UsageType"] for entry in entries]):
+            print("\t\t", concept)
