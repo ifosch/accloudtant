@@ -25,11 +25,9 @@ class UsageRecord(object):
         if self.type.startswith("EUC1-"):
             return "EU (Frankfurt)"
 
-
-def is_data_transfer(entry):
-    if "DataTransfer" in entry.type or "CloudFront" in entry.type:
-        return True
-    return False
+    @property
+    def is_data_transfer(self):
+        return "DataTransfer" in self.type or "CloudFront" in self.type
 
 
 def get_areas(entries, resource_areas):
@@ -47,7 +45,7 @@ def get_areas(entries, resource_areas):
 
 
 def get_data_transfers(entries):
-    return [entry for entry in entries if is_data_transfer(entry)]
+    return [entry for entry in entries if entry.is_data_transfer]
 
 
 def get_concepts(entries, omit=lambda x: False):
@@ -101,7 +99,7 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
         print("\t", area_name)
-        for concept, records in get_concepts(entries, omit=lambda x: is_data_transfer(x) or x.type == "StorageObjectCount").items():
+        for concept, records in get_concepts(entries, omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
             total = get_total(records)
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
@@ -110,6 +108,6 @@ if __name__ == "__main__":
         print("Data Transfer")
         for area_name, entries in get_areas(data_transfers, resource_areas).items():
             print("\t", area_name)
-            for concept, records in get_concepts(entries, omit=lambda x: not is_data_transfer(x)).items():
+            for concept, records in get_concepts(entries, omit=lambda x: not x.is_data_transfer).items():
                 total = get_total(records)
                 print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
