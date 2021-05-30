@@ -32,6 +32,10 @@ def get_areas(entries, resource_areas):
     return areas
 
 
+def get_data_transfers(entries):
+    return [entry for entry in entries if is_data_transfer(entry)]
+
+
 def get_concepts(entries):
     concepts = {}
 
@@ -81,3 +85,9 @@ if __name__ == "__main__":
         for concept, records in get_concepts(entries).items():
             total = get_total(records)
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
+
+    data_transfers = get_data_transfers(usage)
+    if len(data_transfers) > 0:
+        print("Data Transfer")
+        for area_name, entries in get_areas(data_transfers, resource_areas).items():
+            print("\t", area_name)
