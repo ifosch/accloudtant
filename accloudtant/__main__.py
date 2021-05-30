@@ -32,6 +32,18 @@ def get_areas(entries, resource_areas):
     return areas
 
 
+def get_concepts(entries):
+    concepts = {}
+
+    for entry in entries:
+        if not omit(entry):
+            if entry[" UsageType"] not in concepts:
+                concepts[entry[" UsageType"]] = []
+            concepts[entry[" UsageType"]].append(entry)
+
+    return concepts
+
+
 if __name__ == "__main__":
     usage = []
     resource_areas = {}
@@ -46,5 +58,6 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
         print("\t", area_name)
-        for concept in set([entry[" UsageType"] for entry in entries if not omit(entry)]):
-            print("\t\t", concept)
+        for concept, records in get_concepts(entries).items():
+            total = sum([int(record[" UsageValue"]) for record in records])
+            print("\t\t", concept, "\t", total)
