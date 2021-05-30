@@ -21,19 +21,18 @@ class UsageRecords(object):
     def append(self, new):
         self._data.append(new)
 
+    def areas(self, resource_areas):
+        areas = {}
 
-def get_areas(entries, resource_areas):
-    areas = {}
+        for entry in self._data:
+            area_name = entry.area
+            if area_name is None and entry.resource in resource_areas:
+                area_name = resource_areas[entry.resource]
+            if area_name not in areas:
+                areas[area_name] = UsageRecords()
+            areas[area_name].append(entry)
 
-    for entry in entries:
-        area_name = entry.area
-        if area_name is None and entry.resource in resource_areas:
-            area_name = resource_areas[entry.resource]
-        if area_name not in areas:
-            areas[area_name] = UsageRecords()
-        areas[area_name].append(entry)
-
-    return areas
+        return areas
 
 
 def get_data_transfers(entries):
@@ -89,7 +88,7 @@ if __name__ == "__main__":
                 resource_areas[entry.resource] = entry.area
 
     print("Simple Storage Service")
-    for area_name, entries in get_areas(usage, resource_areas).items():
+    for area_name, entries in usage.areas(resource_areas).items():
         print("\t", area_name)
         for concept, records in get_concepts(entries, omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
             total = get_total(records)
@@ -98,7 +97,7 @@ if __name__ == "__main__":
     data_transfers = get_data_transfers(usage)
     if len(data_transfers) > 0:
         print("Data Transfer")
-        for area_name, entries in get_areas(data_transfers, resource_areas).items():
+        for area_name, entries in data_transfers.areas(resource_areas).items():
             print("\t", area_name)
             for concept, records in get_concepts(entries, omit=lambda x: not x.is_data_transfer).items():
                 total = get_total(records)
