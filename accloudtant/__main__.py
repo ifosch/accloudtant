@@ -8,10 +8,10 @@ class UsageRecord(object):
     def __getitem__(self, key):
         return self._data[key]
 
-
-def area(entry):
-    if entry[" UsageType"].startswith("EUC1-"):
-        return "EU (Frankfurt)"
+    @property
+    def area(self):
+        if self._data[" UsageType"].startswith("EUC1-"):
+            return "EU (Frankfurt)"
 
 
 def is_data_transfer(entry):
@@ -24,7 +24,7 @@ def get_areas(entries, resource_areas):
     areas = {}
 
     for entry in entries:
-        area_name = area(entry)
+        area_name = entry.area
         if area_name is None and entry[" Resource"] in resource_areas:
             area_name = resource_areas[entry[" Resource"]]
         if area_name not in areas:
@@ -83,8 +83,8 @@ if __name__ == "__main__":
         for row in reader:
             entry = UsageRecord(row)
             usage.append(entry)
-            if area(entry) is not None:
-                resource_areas[entry[" Resource"]] = area(entry)
+            if entry.area is not None:
+                resource_areas[entry[" Resource"]] = entry.area
 
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
