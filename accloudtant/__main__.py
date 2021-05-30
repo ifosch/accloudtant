@@ -37,44 +37,43 @@ class UsageRecords(object):
     def data_transfers(self):
         return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
-    def concepts(self, omit=lambda x: False):
-        concepts = {}
+    def totals(self, omit=lambda x: False):
+        concepts = []
 
-        for entry in self._data:
-            if not omit(entry):
-                if entry.type not in concepts:
-                    concepts[entry.type] = UsageRecords()
-                concepts[entry.type].append(entry)
+        for concept in set([entry.type for entry in self._data if not omit(entry)]):
+            total_calc = default_total_calc
+            if concept.endswith("ByteHrs"):
+                total_calc = bytehrs_total_calc
+            elif concept.endswith("Bytes"):
+                total_calc = bytes_total_calc
+            concepts.append((
+                concept,
+                "{:.3f}".format(total_calc(
+                    [e for e in self._data if e.type == concept and not omit(e)])),
+                unit(concept),
+            ))
 
-        return concepts.items()
-
-    def total(self):
-        total_calc = default_total_calc
-        if self._data[0].type.endswith("ByteHrs"):
-            total_calc = bytehrs_total_calc
-        elif self._data[0].type.endswith("Bytes"):
-            total_calc = bytes_total_calc
-        return total_calc(self._data)
-
-
-def default_total_calc(values):
-    return sum([int(entry.value) for entry in values])
+        return concepts
 
 
-def bytes_total_calc(values):
-    return default_total_calc(values) / 1073741824
+def default_total_calc(entries):
+    return sum([int(entry.value) for entry in entries])
 
 
-def bytehrs_total_calc(values):
+def bytes_total_calc(entries):
+    return default_total_calc(entries) / 1073741824
+
+
+def bytehrs_total_calc(entries):
     totals = {}
-    for entry in values:
+    for entry in entries:
         if entry.value not in totals:
             totals[entry.value] = []
         totals[entry.value].append(entry)
     total = 0
-    for value, vs in totals.items():
-        total += int(value) * len(vs) / 24
-    return total / 1073741824 / len(values)
+    for value, values in totals.items():
+        total += int(value) * len(values) / 24
+    return total / 1073741824 / len(entries)
 
 
 def unit(concept):
@@ -100,15 +99,15 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in usage.areas(resource_areas):
         print("\t", area_name)
-        for concept, records in entries.concepts(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):
-            total = records.total()
-            print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
+        for concept, value, u in entries.totals(
+                omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):
+            print("\t\t{}\t{} {}".format(concept, value, u))
 
     data_transfers = usage.data_transfers()
     if len(data_transfers) > 0:
         print("Data Transfer")
         for area_name, entries in data_transfers.areas(resource_areas):
             print("\t", area_name)
-            for concept, records in entries.concepts(omit=lambda x: not x.is_data_transfer):
-                total = records.total()
-                print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
+            for concept, value, u in entries.totals(
+                    omit=lambda x: not x.is_data_transfer):
+                print("\t\t{}\t{} {}".format(concept, value, u))
