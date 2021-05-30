@@ -6,6 +6,18 @@ def area(entry):
         return "EU (Frankfurt)"
 
 
+def is_data_transfer(entry):
+    if "DataTransfer" in entry[" UsageType"] or "CloudFront" in entry[" UsageType"]:
+        return True
+    return False
+
+
+def omit(entry):
+    if is_data_transfer(entry) or entry[" UsageType"] == "StorageObjectCount":
+        return True
+    return False
+
+
 def get_areas(entries, resource_areas):
     areas = {}
 
@@ -34,5 +46,5 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
         print("\t", area_name)
-        for concept in set([entry[" UsageType"] for entry in entries]):
+        for concept in set([entry[" UsageType"] for entry in entries if not omit(entry)]):
             print("\t\t", concept)
