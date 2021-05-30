@@ -37,17 +37,16 @@ class UsageRecords(object):
     def data_transfers(self):
         return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
+    def concepts(self, omit=lambda x: False):
+        concepts = {}
 
-def get_concepts(entries, omit=lambda x: False):
-    concepts = {}
+        for entry in self._data:
+            if not omit(entry):
+                if entry.type not in concepts:
+                    concepts[entry.type] = UsageRecords()
+                concepts[entry.type].append(entry)
 
-    for entry in entries:
-        if not omit(entry):
-            if entry.type not in concepts:
-                concepts[entry.type] = UsageRecords()
-            concepts[entry.type].append(entry)
-
-    return concepts
+        return concepts
 
 
 def get_total(entries):
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in usage.areas(resource_areas).items():
         print("\t", area_name)
-        for concept, records in get_concepts(entries, omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
+        for concept, records in entries.concepts(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
             total = get_total(records)
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
@@ -98,6 +97,6 @@ if __name__ == "__main__":
         print("Data Transfer")
         for area_name, entries in data_transfers.areas(resource_areas).items():
             print("\t", area_name)
-            for concept, records in get_concepts(entries, omit=lambda x: not x.is_data_transfer).items():
+            for concept, records in entries.concepts(omit=lambda x: not x.is_data_transfer).items():
                 total = get_total(records)
                 print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
