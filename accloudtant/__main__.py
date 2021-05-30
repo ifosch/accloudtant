@@ -13,6 +13,10 @@ class UsageRecord(object):
         return self._data[" UsageType"]
 
     @property
+    def value(self):
+        return int(self._data[" UsageValue"])
+
+    @property
     def resource(self):
         return self._data[" Resource"]
 
@@ -62,16 +66,16 @@ def get_total(entries):
     if entries[0].type.endswith("ByteHrs"):
         totals = {}
         for entry in entries:
-            if entry[" UsageValue"] not in totals:
-                totals[entry[" UsageValue"]] = []
-            totals[entry[" UsageValue"]].append(entry)
+            if entry.value not in totals:
+                totals[entry.value] = []
+            totals[entry.value].append(entry)
         total = 0
         for value, values in totals.items():
             total += int(value) * len(values) / 24
         return total / 1073741824 / len(entries)
     elif entries[0].type.endswith("Bytes"):
-        return sum([int(entry[" UsageValue"]) for entry in entries]) / 1073741824
-    return sum([int(entry[" UsageValue"]) for entry in entries])
+        return sum([int(entry.value) for entry in entries]) / 1073741824
+    return sum([int(entry.value) for entry in entries])
 
 
 def unit(concept):
