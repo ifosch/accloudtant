@@ -12,12 +12,6 @@ def is_data_transfer(entry):
     return False
 
 
-def omit(entry):
-    if is_data_transfer(entry) or entry[" UsageType"] == "StorageObjectCount":
-        return True
-    return False
-
-
 def get_areas(entries, resource_areas):
     areas = {}
 
@@ -36,7 +30,7 @@ def get_data_transfers(entries):
     return [entry for entry in entries if is_data_transfer(entry)]
 
 
-def get_concepts(entries):
+def get_concepts(entries, omit=lambda x: False):
     concepts = {}
 
     for entry in entries:
@@ -82,7 +76,7 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
         print("\t", area_name)
-        for concept, records in get_concepts(entries).items():
+        for concept, records in get_concepts(entries, omit=lambda x: is_data_transfer(x) or x[" UsageType"] == "StorageObjectCount").items():
             total = get_total(records)
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
@@ -91,3 +85,5 @@ if __name__ == "__main__":
         print("Data Transfer")
         for area_name, entries in get_areas(data_transfers, resource_areas).items():
             print("\t", area_name)
+            for concept in get_concepts(entries, omit=lambda x: not is_data_transfer(x)):
+                print("\t\t", concept)
