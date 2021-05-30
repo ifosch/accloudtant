@@ -9,17 +9,21 @@ class UsageRecord(object):
         return self._data[key]
 
     @property
+    def type(self):
+        return self._data[" UsageType"]
+
+    @property
     def resource(self):
         return self._data[" Resource"]
 
     @property
     def area(self):
-        if self._data[" UsageType"].startswith("EUC1-"):
+        if self.type.startswith("EUC1-"):
             return "EU (Frankfurt)"
 
 
 def is_data_transfer(entry):
-    if "DataTransfer" in entry[" UsageType"] or "CloudFront" in entry[" UsageType"]:
+    if "DataTransfer" in entry.type or "CloudFront" in entry.type:
         return True
     return False
 
@@ -47,15 +51,15 @@ def get_concepts(entries, omit=lambda x: False):
 
     for entry in entries:
         if not omit(entry):
-            if entry[" UsageType"] not in concepts:
-                concepts[entry[" UsageType"]] = []
-            concepts[entry[" UsageType"]].append(entry)
+            if entry.type not in concepts:
+                concepts[entry.type] = []
+            concepts[entry.type].append(entry)
 
     return concepts
 
 
 def get_total(entries):
-    if entries[0][" UsageType"].endswith("ByteHrs"):
+    if entries[0].type.endswith("ByteHrs"):
         totals = {}
         for entry in entries:
             if entry[" UsageValue"] not in totals:
@@ -65,7 +69,7 @@ def get_total(entries):
         for value, values in totals.items():
             total += int(value) * len(values) / 24
         return total / 1073741824 / len(entries)
-    elif entries[0][" UsageType"].endswith("Bytes"):
+    elif entries[0].type.endswith("Bytes"):
         return sum([int(entry[" UsageValue"]) for entry in entries]) / 1073741824
     return sum([int(entry[" UsageValue"]) for entry in entries])
 
@@ -93,7 +97,7 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
         print("\t", area_name)
-        for concept, records in get_concepts(entries, omit=lambda x: is_data_transfer(x) or x[" UsageType"] == "StorageObjectCount").items():
+        for concept, records in get_concepts(entries, omit=lambda x: is_data_transfer(x) or x.type == "StorageObjectCount").items():
             total = get_total(records)
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
