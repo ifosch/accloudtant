@@ -8,6 +8,7 @@ class UsageRecords(object):
         if data is None:
             data = []
         self._data = data
+        self.resource_areas = {}
 
     def __getitem__(self, i):
         return self._data[i]
@@ -19,15 +20,17 @@ class UsageRecords(object):
         return self._data.__iter__()
 
     def append(self, new):
+        if new.area is not None:
+            self.resource_areas[new.resource] = new.area
         self._data.append(new)
 
-    def areas(self, resource_areas):
+    def areas(self):
         areas = {}
 
         for entry in self._data:
             area_name = entry.area
-            if area_name is None and entry.resource in resource_areas:
-                area_name = resource_areas[entry.resource]
+            if area_name is None and entry.resource in self.resource_areas:
+                area_name = self.resource_areas[entry.resource]
             if area_name not in areas:
                 areas[area_name] = UsageRecords()
             areas[area_name].append(entry)
@@ -86,18 +89,14 @@ def unit(concept):
 
 if __name__ == "__main__":
     usage = UsageRecords()
-    resource_areas = {}
 
     with open("tests/fixtures/2021/03/S3.csv") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            entry = UsageRecord(row)
-            usage.append(entry)
-            if entry.area is not None:
-                resource_areas[entry.resource] = entry.area
+            usage.append(UsageRecord(row))
 
     print("Simple Storage Service")
-    for area_name, entries in usage.areas(resource_areas):
+    for area_name, entries in usage.areas():
         print("\t", area_name)
         for concept, value, u in entries.totals(
                 omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):
@@ -106,7 +105,7 @@ if __name__ == "__main__":
     data_transfers = usage.data_transfers()
     if len(data_transfers) > 0:
         print("Data Transfer")
-        for area_name, entries in data_transfers.areas(resource_areas):
+        for area_name, entries in data_transfers.areas():
             print("\t", area_name)
             for concept, value, u in entries.totals(
                     omit=lambda x: not x.is_data_transfer):
