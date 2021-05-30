@@ -53,12 +53,16 @@ def get_total(entries):
         for value, values in totals.items():
             total += int(value) * len(values) / 24
         return total / 1073741824 / len(entries)
+    elif entries[0][" UsageType"].endswith("Bytes"):
+        return sum([int(entry[" UsageValue"]) for entry in entries]) / 1073741824
     return sum([int(entry[" UsageValue"]) for entry in entries])
 
 
 def unit(concept):
     if concept.endswith("ByteHrs"):
         return "GB-Mo"
+    elif concept.endswith("Bytes"):
+        return "GB"
     return "Requests"
 
 
@@ -85,5 +89,6 @@ if __name__ == "__main__":
         print("Data Transfer")
         for area_name, entries in get_areas(data_transfers, resource_areas).items():
             print("\t", area_name)
-            for concept in get_concepts(entries, omit=lambda x: not is_data_transfer(x)):
-                print("\t\t", concept)
+            for concept, records in get_concepts(entries, omit=lambda x: not is_data_transfer(x)).items():
+                total = get_total(records)
+                print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
