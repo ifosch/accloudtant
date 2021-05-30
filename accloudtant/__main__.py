@@ -41,22 +41,24 @@ class UsageRecords(object):
         return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
     def totals(self, omit=lambda x: False):
-        concepts = []
+        areas = {}
 
-        for concept in set([entry.type for entry in self._data if not omit(entry)]):
-            total_calc = default_total_calc
-            if concept.endswith("ByteHrs"):
-                total_calc = bytehrs_total_calc
-            elif concept.endswith("Bytes"):
-                total_calc = bytes_total_calc
-            concepts.append((
-                concept,
-                "{:.3f}".format(total_calc(
-                    [e for e in self._data if e.type == concept and not omit(e)])),
-                unit(concept),
-            ))
+        for area, entries in self.areas():
+            areas[area] = []
+            for concept in set([entry.type for entry in entries if not omit(entry)]):
+                total_calc = default_total_calc
+                if concept.endswith("ByteHrs"):
+                    total_calc = bytehrs_total_calc
+                elif concept.endswith("Bytes"):
+                    total_calc = bytes_total_calc
+                areas[area].append((
+                    concept,
+                    "{:.3f}".format(total_calc(
+                        [e for e in entries if e.type == concept and not omit(e)])),
+                    unit(concept),
+                ))
 
-        return concepts
+        return areas.items()
 
 
 def default_total_calc(entries):
@@ -96,17 +98,15 @@ if __name__ == "__main__":
             usage.append(UsageRecord(row))
 
     print("Simple Storage Service")
-    for area_name, entries in usage.areas():
-        print("\t", area_name)
-        for concept, value, u in entries.totals(
-                omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):
-            print("\t\t{}\t{} {}".format(concept, value, u))
+    for area, concepts in usage.totals(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):
+        print("\t", area)
+        for c, v, u in concepts:
+            print("\t\t{}\t{} {}".format(c, v, u))
 
     data_transfers = usage.data_transfers()
     if len(data_transfers) > 0:
         print("Data Transfer")
-        for area_name, entries in data_transfers.areas():
-            print("\t", area_name)
-            for concept, value, u in entries.totals(
-                    omit=lambda x: not x.is_data_transfer):
-                print("\t\t{}\t{} {}".format(concept, value, u))
+        for area, concepts in data_transfers.totals(omit=lambda x: not x.is_data_transfer):
+            print("\t", area)
+            for c, v, u in concepts:
+                print("\t\t{}\t{} {}".format(c, v, u))
