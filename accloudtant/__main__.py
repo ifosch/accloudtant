@@ -46,7 +46,7 @@ class UsageRecords(object):
                     concepts[entry.type] = UsageRecords()
                 concepts[entry.type].append(entry)
 
-        return concepts
+        return concepts.items()
 
     def total(self):
         if self._data[0].type.endswith("ByteHrs"):
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     print("Simple Storage Service")
     for area_name, entries in usage.areas(resource_areas):
         print("\t", area_name)
-        for concept, records in entries.concepts(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
+        for concept, records in entries.concepts(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):
             total = records.total()
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
@@ -96,6 +96,6 @@ if __name__ == "__main__":
         print("Data Transfer")
         for area_name, entries in data_transfers.areas(resource_areas):
             print("\t", area_name)
-            for concept, records in entries.concepts(omit=lambda x: not x.is_data_transfer).items():
+            for concept, records in entries.concepts(omit=lambda x: not x.is_data_transfer):
                 total = records.total()
                 print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
