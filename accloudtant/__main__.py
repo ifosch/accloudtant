@@ -48,21 +48,20 @@ class UsageRecords(object):
 
         return concepts
 
-
-def get_total(entries):
-    if entries[0].type.endswith("ByteHrs"):
-        totals = {}
-        for entry in entries:
-            if entry.value not in totals:
-                totals[entry.value] = []
-            totals[entry.value].append(entry)
-        total = 0
-        for value, values in totals.items():
-            total += int(value) * len(values) / 24
-        return total / 1073741824 / len(entries)
-    elif entries[0].type.endswith("Bytes"):
-        return sum([int(entry.value) for entry in entries]) / 1073741824
-    return sum([int(entry.value) for entry in entries])
+    def total(self):
+        if self._data[0].type.endswith("ByteHrs"):
+            totals = {}
+            for entry in self._data:
+                if entry.value not in totals:
+                    totals[entry.value] = []
+                totals[entry.value].append(entry)
+            total = 0
+            for value, values in totals.items():
+                total += int(value) * len(values) / 24
+            return total / 1073741824 / len(self._data)
+        elif self._data[0].type.endswith("Bytes"):
+            return sum([int(entry.value) for entry in self._data]) / 1073741824
+        return sum([int(entry.value) for entry in self._data])
 
 
 def unit(concept):
@@ -89,7 +88,7 @@ if __name__ == "__main__":
     for area_name, entries in usage.areas(resource_areas).items():
         print("\t", area_name)
         for concept, records in entries.concepts(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
-            total = get_total(records)
+            total = records.total()
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
     data_transfers = usage.data_transfers()
@@ -98,5 +97,5 @@ if __name__ == "__main__":
         for area_name, entries in data_transfers.areas(resource_areas).items():
             print("\t", area_name)
             for concept, records in entries.concepts(omit=lambda x: not x.is_data_transfer).items():
-                total = get_total(records)
+                total = records.total()
                 print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
