@@ -2,9 +2,6 @@ class UsageRecord(object):
     def __init__(self, data):
         self._data = data
 
-    def __getitem__(self, key):
-        return self._data[key]
-
     @property
     def type(self):
         return self._data[" UsageType"]
