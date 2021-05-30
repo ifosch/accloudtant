@@ -32,7 +32,7 @@ class UsageRecords(object):
                 areas[area_name] = UsageRecords()
             areas[area_name].append(entry)
 
-        return areas
+        return areas.items()
 
     def data_transfers(self):
         return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
@@ -85,7 +85,7 @@ if __name__ == "__main__":
                 resource_areas[entry.resource] = entry.area
 
     print("Simple Storage Service")
-    for area_name, entries in usage.areas(resource_areas).items():
+    for area_name, entries in usage.areas(resource_areas):
         print("\t", area_name)
         for concept, records in entries.concepts(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount").items():
             total = records.total()
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     data_transfers = usage.data_transfers()
     if len(data_transfers) > 0:
         print("Data Transfer")
-        for area_name, entries in data_transfers.areas(resource_areas).items():
+        for area_name, entries in data_transfers.areas(resource_areas):
             print("\t", area_name)
             for concept, records in entries.concepts(omit=lambda x: not x.is_data_transfer).items():
                 total = records.total()
