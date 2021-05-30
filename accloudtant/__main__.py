@@ -44,6 +44,20 @@ def get_concepts(entries):
     return concepts
 
 
+def get_total(entries):
+    if entries[0][" UsageType"].endswith("ByteHrs"):
+        totals = {}
+        for entry in entries:
+            if entry[" UsageValue"] not in totals:
+                totals[entry[" UsageValue"]] = []
+            totals[entry[" UsageValue"]].append(entry)
+        total = 0
+        for value, values in totals.items():
+            total += int(value) * len(values) / 24
+        return total / 1073741824 / len(entries)
+    return sum([int(entry[" UsageValue"]) for entry in entries])
+
+
 if __name__ == "__main__":
     usage = []
     resource_areas = {}
@@ -59,5 +73,5 @@ if __name__ == "__main__":
     for area_name, entries in get_areas(usage, resource_areas).items():
         print("\t", area_name)
         for concept, records in get_concepts(entries).items():
-            total = sum([int(record[" UsageValue"]) for record in records])
-            print("\t\t", concept, "\t", total)
+            total = get_total(records)
+            print("\t\t", concept, "\t{:.3f}".format(total))
