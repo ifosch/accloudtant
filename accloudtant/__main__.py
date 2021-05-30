@@ -34,9 +34,8 @@ class UsageRecords(object):
 
         return areas
 
-
-def get_data_transfers(entries):
-    return UsageRecords([entry for entry in entries if entry.is_data_transfer])
+    def data_transfers(self):
+        return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
 
 def get_concepts(entries, omit=lambda x: False):
@@ -94,7 +93,7 @@ if __name__ == "__main__":
             total = get_total(records)
             print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
 
-    data_transfers = get_data_transfers(usage)
+    data_transfers = usage.data_transfers()
     if len(data_transfers) > 0:
         print("Data Transfer")
         for area_name, entries in data_transfers.areas(resource_areas).items():
