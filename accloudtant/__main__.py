@@ -9,6 +9,10 @@ class UsageRecord(object):
         return self._data[key]
 
     @property
+    def resource(self):
+        return self._data[" Resource"]
+
+    @property
     def area(self):
         if self._data[" UsageType"].startswith("EUC1-"):
             return "EU (Frankfurt)"
@@ -25,8 +29,8 @@ def get_areas(entries, resource_areas):
 
     for entry in entries:
         area_name = entry.area
-        if area_name is None and entry[" Resource"] in resource_areas:
-            area_name = resource_areas[entry[" Resource"]]
+        if area_name is None and entry.resource in resource_areas:
+            area_name = resource_areas[entry.resource]
         if area_name not in areas:
             areas[area_name] = []
         areas[area_name].append(entry)
@@ -84,7 +88,7 @@ if __name__ == "__main__":
             entry = UsageRecord(row)
             usage.append(entry)
             if entry.area is not None:
-                resource_areas[entry[" Resource"]] = entry.area
+                resource_areas[entry.resource] = entry.area
 
     print("Simple Storage Service")
     for area_name, entries in get_areas(usage, resource_areas).items():
