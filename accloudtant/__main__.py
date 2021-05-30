@@ -3,6 +3,17 @@ import csv
 from accloudtant.usage_record import UsageRecord
 
 
+class UsageRecords(object):
+    def __init__(self):
+        self._data = []
+
+    def __iter__(self):
+        return self._data.__iter__()
+
+    def append(self, new):
+        self._data.append(new)
+
+
 def get_areas(entries, resource_areas):
     areas = {}
 
@@ -58,7 +69,7 @@ def unit(concept):
 
 
 if __name__ == "__main__":
-    usage = []
+    usage = UsageRecords()
     resource_areas = {}
 
     with open("tests/fixtures/2021/03/S3.csv") as f:
