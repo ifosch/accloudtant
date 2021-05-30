@@ -4,8 +4,16 @@ from accloudtant.usage_record import UsageRecord
 
 
 class UsageRecords(object):
-    def __init__(self):
-        self._data = []
+    def __init__(self, data=None):
+        if data is None:
+            data = []
+        self._data = data
+
+    def __getitem__(self, i):
+        return self._data[i]
+
+    def __len__(self):
+        return len(self._data)
 
     def __iter__(self):
         return self._data.__iter__()
@@ -22,14 +30,14 @@ def get_areas(entries, resource_areas):
         if area_name is None and entry.resource in resource_areas:
             area_name = resource_areas[entry.resource]
         if area_name not in areas:
-            areas[area_name] = []
+            areas[area_name] = UsageRecords()
         areas[area_name].append(entry)
 
     return areas
 
 
 def get_data_transfers(entries):
-    return [entry for entry in entries if entry.is_data_transfer]
+    return UsageRecords([entry for entry in entries if entry.is_data_transfer])
 
 
 def get_concepts(entries, omit=lambda x: False):
@@ -38,7 +46,7 @@ def get_concepts(entries, omit=lambda x: False):
     for entry in entries:
         if not omit(entry):
             if entry.type not in concepts:
-                concepts[entry.type] = []
+                concepts[entry.type] = UsageRecords()
             concepts[entry.type].append(entry)
 
     return concepts
