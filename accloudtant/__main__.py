@@ -58,6 +58,12 @@ def get_total(entries):
     return sum([int(entry[" UsageValue"]) for entry in entries])
 
 
+def unit(concept):
+    if concept.endswith("ByteHrs"):
+        return "GB-Mo"
+    return "Requests"
+
+
 if __name__ == "__main__":
     usage = []
     resource_areas = {}
@@ -74,4 +80,4 @@ if __name__ == "__main__":
         print("\t", area_name)
         for concept, records in get_concepts(entries).items():
             total = get_total(records)
-            print("\t\t", concept, "\t{:.3f}".format(total))
+            print("\t\t", concept, "\t{:.3f}".format(total), unit(concept))
