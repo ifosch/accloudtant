@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "accloudtant"
+version = "0.1.0"
+description = "AWS cost calculator"
+authors = ["Ignasi Fosch <natx@y10k.ws>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
