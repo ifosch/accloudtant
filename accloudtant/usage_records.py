@@ -47,24 +47,25 @@ class UsageRecords(object):
         return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
     def totals(self):
-        areas = {}
+        services = {}
+        for service, areas in self.services():
+            services[service] = {}
+            for area, entries in areas.areas():
+                services[service][area] = []
+                for concept in set([entry.type for entry in entries if not entry.omit]):
+                    total_calc = default_total_calc
+                    if concept.endswith("ByteHrs"):
+                        total_calc = bytehrs_total_calc
+                    elif concept.endswith("Bytes"):
+                        total_calc = bytes_total_calc
+                    services[service][area].append((
+                        concept,
+                        "{:.3f}".format(total_calc(
+                            [e for e in entries if e.type == concept and not e.omit])),
+                        unit(concept),
+                    ))
 
-        for area, entries in self.areas():
-            areas[area] = []
-            for concept in set([entry.type for entry in entries if not entry.omit]):
-                total_calc = default_total_calc
-                if concept.endswith("ByteHrs"):
-                    total_calc = bytehrs_total_calc
-                elif concept.endswith("Bytes"):
-                    total_calc = bytes_total_calc
-                areas[area].append((
-                    concept,
-                    "{:.3f}".format(total_calc(
-                        [e for e in entries if e.type == concept and not e.omit])),
-                    unit(concept),
-                ))
-
-        return areas.items()
+        return services.items()
 
 
 def default_total_calc(entries):

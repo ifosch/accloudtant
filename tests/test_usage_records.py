@@ -2,7 +2,6 @@ import csv
 import pytest
 
 from accloudtant import load_data
-from accloudtant.aws import s3, data_transfer
 
 
 @pytest.mark.parametrize(
@@ -32,9 +31,9 @@ from accloudtant.aws import s3, data_transfer
 def test_usage_records_totals(csv_file, expected):
     usage = load_data(csv_file)
 
-    for service, entries in usage.services():
+    for service, areas in usage.totals():
         assert service in expected
-        for area, concepts in entries.totals():
+        for area, concepts in areas.items():
             assert area in expected[service]
             for c, v, u in concepts:
                 assert "{} {} {}".format(c, v, u) in expected[service][area]

@@ -10,9 +10,9 @@ if __name__ == "__main__":
 
     usage = load_data(args.csv_file)
 
-    for service, entries in usage.services():
+    for service, areas in usage.totals():
         print(service)
-        for area, concepts in entries.totals():
+        for area, concepts in areas.items():
             print("\t", area)
             for c, v, u in concepts:
                 print("\t\t{}\t{} {}".format(c, v, u))
