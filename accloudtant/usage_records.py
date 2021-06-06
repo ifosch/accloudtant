@@ -93,4 +93,6 @@ def unit(concept):
         return "GB-Mo"
     elif concept.endswith("Bytes"):
         return "GB"
+    elif concept == "Invalidations":
+        return "URL"
     return "Requests"

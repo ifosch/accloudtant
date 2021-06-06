@@ -1,9 +1,13 @@
-from accloudtant.aws import s3, data_transfer
+from accloudtant.aws import s3, cloudfront, data_transfer
 
 SERVICES = {
     "AmazonS3": {
         "name": "Simple Storage Service",
         "module": s3,
+    },
+    "AmazonCloudFront": {
+        "name": "CloudFront",
+        "module": cloudfront,
     },
     "Data Transfer": {
         "name": "Data Transfer",
@@ -18,7 +22,7 @@ class UsageRecord(object):
 
     @property
     def service(self):
-        if self.is_data_transfer:
+        if SERVICES[self._data["Service"]]["module"].is_data_transfer(self.type):
             return "Data Transfer"
         return self._data["Service"]
 
@@ -38,10 +42,20 @@ class UsageRecord(object):
     def area(self):
         if self.type.startswith("EUC1-"):
             return "EU (Frankfurt)"
+        elif self.type.startswith("US-"):
+            return "United States"
+        elif self.type.startswith("EU-"):
+            return "Europe"
+        elif self.type.startswith("CA-"):
+            return "Canada"
+        elif self.type == "Invalidations":
+            return "Global"
 
     @property
     def is_data_transfer(self):
-        return "DataTransfer" in self.type or "CloudFront" in self.type
+        if self.service in SERVICES:
+            return SERVICES[self.service]["module"].is_data_transfer(self.type)
+        return False
 
     @property
     def omit(self):
