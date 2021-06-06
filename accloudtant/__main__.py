@@ -1,16 +1,8 @@
-import csv
-
-from accloudtant.usage_record import UsageRecord
-from accloudtant.usage_records import UsageRecords
+from accloudtant import load_data
 
 
 if __name__ == "__main__":
-    usage = UsageRecords()
-
-    with open("tests/fixtures/2021/03/S3.csv") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            usage.append(UsageRecord(row))
+    usage = load_data("tests/fixtures/2021/03/S3.csv")
 
     print("Simple Storage Service")
     for area, concepts in usage.totals(omit=lambda x: x.is_data_transfer or x.type == "StorageObjectCount"):

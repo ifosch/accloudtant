@@ -1,8 +1,7 @@
 import csv
 import pytest
 
-from accloudtant.usage_record import UsageRecord
-from accloudtant.usage_records import UsageRecords
+from accloudtant import load_data
 
 
 @pytest.mark.parametrize(
@@ -22,12 +21,7 @@ from accloudtant.usage_records import UsageRecords
     ],
 )
 def test_usage_records_totals(csv_file, omit_lambda, expected):
-    usage = UsageRecords()
-
-    with open(csv_file) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            usage.append(UsageRecord(row))
+    usage = load_data(csv_file)
 
     for area, concepts in usage.totals(omit=omit_lambda):
         assert area in expected
@@ -52,12 +46,7 @@ def test_usage_records_totals(csv_file, omit_lambda, expected):
     ],
 )
 def test_usage_records_data_transfers(csv_file, omit_lambda, expected):
-    usage = UsageRecords()
-
-    with open(csv_file) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            usage.append(UsageRecord(row))
+    usage = load_data(csv_file)
 
     for area, concepts in usage.data_transfers().totals(omit=omit_lambda):
         assert area in expected
