@@ -1,4 +1,4 @@
-from accloudtant.aws import s3, cloudfront, data_transfer
+from accloudtant.aws import s3, cloudfront, data_transfer, route53
 
 SERVICES = {
     "AmazonS3": {
@@ -8,6 +8,10 @@ SERVICES = {
     "AmazonCloudFront": {
         "name": "CloudFront",
         "module": cloudfront,
+    },
+    "AmazonRoute53": {
+        "name": "Route 53",
+        "module": route53,
     },
     "Data Transfer": {
         "name": "Data Transfer",
@@ -48,7 +52,7 @@ class UsageRecord(object):
             return "Europe"
         elif self.type.startswith("CA-"):
             return "Canada"
-        elif self.type == "Invalidations":
+        elif self.type == "Invalidations" or self.service == "AmazonRoute53":
             return "Global"
 
     @property

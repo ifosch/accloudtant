@@ -52,6 +52,17 @@ from accloudtant import load_data
                 },
             },
         ),
+        (
+            "tests/fixtures/2021/03/R53.csv",
+            {
+                "AmazonRoute53": {
+                    "Global": [
+                        "HostedZone 1.000 Hosted zones",
+                        "DNS-Queries 79465.000 Queries",
+                    ],
+                },
+            },
+        ),
     ],
 )
 def test_usage_records_totals(csv_file, expected):

@@ -98,4 +98,8 @@ def unit(concept):
         return "GB"
     elif concept == "Invalidations":
         return "URL"
+    elif concept == "DNS-Queries":
+        return "Queries"
+    elif concept == "HostedZone":
+        return "Hosted zones"
     return "Requests"
