@@ -10,16 +10,9 @@ if __name__ == "__main__":
 
     usage = load_data(args.csv_file)
 
-    print("Simple Storage Service")
-    for area, concepts in usage.totals(omit=s3.omit):
-        print("\t", area)
-        for c, v, u in concepts:
-            print("\t\t{}\t{} {}".format(c, v, u))
-
-    data_transfers = usage.data_transfers()
-    if len(data_transfers) > 0:
-        print("Data Transfer")
-        for area, concepts in data_transfers.totals(omit=data_transfer.omit):
+    for service, entries in usage.services():
+        print(service)
+        for area, concepts in entries.totals():
             print("\t", area)
             for c, v, u in concepts:
                 print("\t\t{}\t{} {}".format(c, v, u))
