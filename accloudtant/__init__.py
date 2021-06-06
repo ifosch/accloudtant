@@ -13,3 +13,13 @@ def load_data(csv_file):
             usage.append(UsageRecord(row))
 
     return usage
+
+
+def load_files(csv_files):
+    usage = UsageRecords()
+
+    for csv_file in csv_files:
+        new_usage = load_data(csv_file)
+        usage.extend(new_usage)
+
+    return usage

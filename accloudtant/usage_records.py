@@ -22,6 +22,11 @@ class UsageRecords(object):
             self.resource_areas[new.resource] = new.area
         self._data.append(new)
 
+    def extend(self, other):
+        for entry in other._data:
+            if entry.type != "Bandwidth":
+                self.append(entry)
+
     def areas(self):
         areas = {}
 
