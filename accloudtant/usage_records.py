@@ -18,6 +18,9 @@ class UsageRecords(object):
         if new.area is not None:
             self.resource_areas[new.resource] = new.area
         self._data.append(new)
+        if new.is_bandwidth:
+            new_bandwidth = new.clone()
+            self._data.append(new_bandwidth)
 
     def areas(self):
         areas = {}
@@ -56,7 +59,7 @@ class UsageRecords(object):
                     total_calc = default_total_calc
                     if concept.endswith("ByteHrs"):
                         total_calc = bytehrs_total_calc
-                    elif concept.endswith("Bytes"):
+                    elif concept.endswith("Bytes") or concept == "Bandwidth":
                         total_calc = bytes_total_calc
                     services[service][area].append((
                         concept,
@@ -91,7 +94,7 @@ def bytehrs_total_calc(entries):
 def unit(concept):
     if concept.endswith("ByteHrs"):
         return "GB-Mo"
-    elif concept.endswith("Bytes"):
+    elif concept.endswith("Bytes") or concept == "Bandwidth":
         return "GB"
     elif concept == "Invalidations":
         return "URL"

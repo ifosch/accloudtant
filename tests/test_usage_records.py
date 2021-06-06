@@ -33,10 +33,12 @@ from accloudtant import load_data
                     "Canada": [
                         "CA-Requests-Tier1 9.000 Requests",
                         "CA-Requests-Tier2-HTTPS 184.000 Requests",
+                        "Bandwidth 0.407 GB",
                     ],
                     "Europe": [
                         "EU-Requests-Tier1 5733.000 Requests",
                         "EU-Requests-Tier2-HTTPS 7998.000 Requests",
+                        "Bandwidth 35.058 GB",
                     ],
                     "Global": [
                         "Invalidations 2.000 URL",
@@ -45,6 +47,7 @@ from accloudtant import load_data
                         "US-Requests-HTTP-Proxy 27.000 Requests",
                         "US-Requests-Tier1 523.000 Requests",
                         "US-Requests-Tier2-HTTPS 1287.000 Requests",
+                        "Bandwidth 4.541 GB",
                     ],
                 },
             },
