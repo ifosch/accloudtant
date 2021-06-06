@@ -2,6 +2,7 @@ import csv
 import pytest
 
 from accloudtant import load_data
+from accloudtant.aws import s3, data_transfer
 
 
 @pytest.mark.parametrize(
@@ -9,7 +10,7 @@ from accloudtant import load_data
     [
         (
             "tests/fixtures/2021/03/S3.csv",
-            lambda x: x.is_data_transfer or x.type == "StorageObjectCount",
+            s3.omit,
             {
                 "EU (Frankfurt)": [
                     "EUC1-Requests-Tier1 6.000 Requests",
@@ -34,7 +35,7 @@ def test_usage_records_totals(csv_file, omit_lambda, expected):
     [
         (
             "tests/fixtures/2021/03/S3.csv",
-            lambda x: not x.is_data_transfer,
+            data_transfer.omit,
             {
                 "EU (Frankfurt)": [
                     "EUC1-DataTransfer-Out-Bytes 0.000 GB",
