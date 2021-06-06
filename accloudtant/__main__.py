@@ -1,14 +1,14 @@
 import argparse
-from accloudtant import load_data
-from accloudtant.aws import s3, data_transfer
+from accloudtant import load_files
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AWS cost calculator")
-    parser.add_argument("csv_file", type=str, help='CSV file to read')
+    parser.add_argument("csv_files", type=str, nargs="*",
+                        help='CSV file to read')
     args = parser.parse_args()
 
-    usage = load_data(args.csv_file)
+    usage = load_files(args.csv_files)
 
     for service, areas in usage.totals():
         print(service)
