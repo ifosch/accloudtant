@@ -26,6 +26,29 @@ from accloudtant import load_data
                 },
             },
         ),
+        (
+            "tests/fixtures/2021/03/CF.csv",
+            {
+                "AmazonCloudFront": {
+                    "Canada": [
+                        "CA-Requests-Tier1 9.000 Requests",
+                        "CA-Requests-Tier2-HTTPS 184.000 Requests",
+                    ],
+                    "Europe": [
+                        "EU-Requests-Tier1 5733.000 Requests",
+                        "EU-Requests-Tier2-HTTPS 7998.000 Requests",
+                    ],
+                    "Global": [
+                        "Invalidations 2.000 URL",
+                    ],
+                    "United States": [
+                        "US-Requests-HTTP-Proxy 27.000 Requests",
+                        "US-Requests-Tier1 523.000 Requests",
+                        "US-Requests-Tier2-HTTPS 1287.000 Requests",
+                    ],
+                },
+            },
+        ),
     ],
 )
 def test_usage_records_totals(csv_file, expected):
