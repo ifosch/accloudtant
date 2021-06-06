@@ -32,15 +32,26 @@ class UsageRecords(object):
 
         return areas.items()
 
+    def services(self):
+        services = {}
+
+        for entry in self._data:
+            service_name = entry.service
+            if service_name not in services:
+                services[service_name] = UsageRecords()
+            services[service_name].append(entry)
+
+        return services.items()
+
     def data_transfers(self):
         return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
-    def totals(self, omit=lambda x: False):
+    def totals(self):
         areas = {}
 
         for area, entries in self.areas():
             areas[area] = []
-            for concept in set([entry.type for entry in entries if not omit(entry)]):
+            for concept in set([entry.type for entry in entries if not entry.omit]):
                 total_calc = default_total_calc
                 if concept.endswith("ByteHrs"):
                     total_calc = bytehrs_total_calc
@@ -49,7 +60,7 @@ class UsageRecords(object):
                 areas[area].append((
                     concept,
                     "{:.3f}".format(total_calc(
-                        [e for e in entries if e.type == concept and not omit(e)])),
+                        [e for e in entries if e.type == concept and not e.omit])),
                     unit(concept),
                 ))
 
