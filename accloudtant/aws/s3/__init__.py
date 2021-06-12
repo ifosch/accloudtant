@@ -6,5 +6,5 @@ def is_data_transfer(usage_type):
     return "DataTransfer" in usage_type or "CloudFront" in usage_type
 
 
-def is_bandwidth(usage_record):
+def is_bandwidth(concept):
     return False

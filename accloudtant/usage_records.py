@@ -1,3 +1,6 @@
+from accloudtant.usage_record import SERVICES
+
+
 class UsageRecords(object):
     def __init__(self, data=None):
         if data is None:
@@ -18,9 +21,6 @@ class UsageRecords(object):
         if new.area is not None:
             self.resource_areas[new.resource] = new.area
         self._data.append(new)
-        if new.is_bandwidth:
-            new_bandwidth = new.clone()
-            self._data.append(new_bandwidth)
 
     def areas(self):
         areas = {}
@@ -56,13 +56,16 @@ class UsageRecords(object):
             for area, entries in areas.areas():
                 services[service][area] = []
                 for concept in set([entry.type for entry in entries if not entry.omit]):
+                    output_concept = concept
                     total_calc = default_total_calc
                     if concept.endswith("ByteHrs"):
                         total_calc = bytehrs_total_calc
-                    elif concept.endswith("Bytes") or concept == "Bandwidth":
+                    elif concept.endswith("Bytes"):
                         total_calc = bytes_total_calc
+                    if SERVICES[service]["module"].is_bandwidth(concept):
+                        output_concept = "Bandwidth"
                     services[service][area].append((
-                        concept,
+                        output_concept,
                         "{:.3f}".format(total_calc(
                             [e for e in entries if e.type == concept and not e.omit])),
                         unit(concept),

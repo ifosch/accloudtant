@@ -72,11 +72,3 @@ class UsageRecord(object):
         if self.service in SERVICES:
             return SERVICES[self.service]["module"].is_bandwidth(self)
         return False
-
-    def clone(self):
-        return UsageRecord({
-            "Service": self.service,
-            " UsageType": "Bandwidth",
-            " UsageValue": self.value,
-            " Resource": self.resource,
-        })
