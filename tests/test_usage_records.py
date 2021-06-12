@@ -38,7 +38,7 @@ from accloudtant import load_data
                     "Europe": [
                         "EU-Requests-Tier1 5733.000 Requests",
                         "EU-Requests-Tier2-HTTPS 7998.000 Requests",
-                        "Bandwidth 35.058 GB",
+                        "Bandwidth 8.388 GB",
                     ],
                     "Global": [
                         "Invalidations 2.000 URL",
@@ -48,6 +48,7 @@ from accloudtant import load_data
                         "US-Requests-Tier1 523.000 Requests",
                         "US-Requests-Tier2-HTTPS 1287.000 Requests",
                         "Bandwidth 4.541 GB",
+                        "Bandwidth 0.000 GB",
                     ],
                 },
             },
