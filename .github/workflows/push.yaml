@@ -22,6 +22,9 @@ jobs:
         run: poetry install --no-interaction --no-root
       - name: Install library
         run: poetry install --no-interaction
+      - name: Run linter
+        run: |
+          poetry run black --check --diff .
       - name: Run tests
         run: |
           poetry run pytest --cov=accloudtant --cov-report xml:coverage.xml
