@@ -1,4 +1,3 @@
-import csv
 import pytest
 
 from accloudtant import load_data
