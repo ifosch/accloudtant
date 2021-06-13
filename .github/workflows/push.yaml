@@ -1,0 +1,33 @@
+name: push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.1.6
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Install library
+        run: poetry install --no-interaction
+      - name: Run tests
+        run: |
+          poetry run pytest --cov=accloudtant --cov-report xml:coverage.xml
+      - name: Publish code coverage
+        uses: paambaati/codeclimate-action@v2.7.5
+        with:
+          coverageLocations: ${{ github.workspace }}/.coverage.xml:coverage.py
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_TOKEN }}
