@@ -69,12 +69,21 @@ class UsageRecords(object):
                         total_calc = bytes_total_calc
                     if SERVICES[service]["module"].is_bandwidth(concept):
                         output_concept = "Bandwidth"
-                    services[service][area].append((
-                        output_concept,
-                        "{:.3f}".format(total_calc(
-                            [e for e in entries if e.type == concept and not e.omit])),
-                        unit(concept),
-                    ))
+                    services[service][area].append(
+                        (
+                            output_concept,
+                            "{:.3f}".format(
+                                total_calc(
+                                    [
+                                        e
+                                        for e in entries
+                                        if e.type == concept and not e.omit
+                                    ]
+                                )
+                            ),
+                            unit(concept),
+                        )
+                    )
 
         return services.items()
 
