@@ -56,28 +56,28 @@ class UsageRecords(object):
             service = SERVICES[service_name]["module"]
             for area, entries in areas.areas():
                 concepts = [e.type for e in entries if not e.omit]
-                if len(concepts) == 0:
-                    continue
-                services[service_name][area] = []
-                for concept in set(concepts):
-                    output_concept = concept
-                    total_calc = service.get_total_calc(concept)
-                    if service.is_bandwidth(concept):
-                        output_concept = "Bandwidth"
-                    services[service_name][area].append(
-                        (
-                            output_concept,
-                            "{:.3f}".format(
-                                total_calc(
-                                    [
-                                        e
-                                        for e in entries
-                                        if e.type == concept and not e.omit
-                                    ]
-                                )
-                            ),
-                            unit(concept),
-                        )
-                    )
+                services[service_name][area] = area_totals(concepts, service, entries)
 
         return services.items()
+
+
+def area_totals(concepts, service, entries):
+    area_totals = []
+    for concept in set(concepts):
+        total_calc = service.get_total_calc(concept)
+        area_totals.append(calculate_concepts(entries, service, concept, total_calc))
+
+    return area_totals
+
+
+def calculate_concepts(entries, service, concept, total_calc_func):
+    output_concept = concept
+    if service.is_bandwidth(concept):
+        output_concept = "Bandwidth"
+    return (
+        output_concept,
+        "{:.3f}".format(
+            total_calc_func([e for e in entries if e.type == concept and not e.omit])
+        ),
+        unit(concept),
+    )
