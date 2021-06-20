@@ -25,10 +25,16 @@ class UsageRecord(object):
         self._data = data
 
     @property
-    def service(self):
+    def service_name(self):
         if SERVICES[self._data["Service"]]["module"].is_data_transfer(self.type):
             return "Data Transfer"
         return self._data["Service"]
+
+    @property
+    def service(self):
+        if self.service_name in SERVICES:
+            return SERVICES[self.service_name]["module"]
+        return None
 
     @property
     def type(self):
@@ -52,17 +58,13 @@ class UsageRecord(object):
             return "Europe"
         elif self.type.startswith("CA-"):
             return "Canada"
-        elif self.type == "Invalidations" or self.service == "AmazonRoute53":
+        elif self.type == "Invalidations" or self.service_name == "AmazonRoute53":
             return "Global"
 
     @property
     def is_data_transfer(self):
-        if self.service in SERVICES:
-            return SERVICES[self.service]["module"].is_data_transfer(self.type)
-        return False
+        return self.service.is_data_transfer(self.type)
 
     @property
     def omit(self):
-        if self.service in SERVICES:
-            return SERVICES[self.service]["module"].omit(self)
-        return False
+        return self.service.omit(self)
