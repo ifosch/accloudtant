@@ -1,0 +1,4 @@
+Service, Operation, UsageType, Resource, StartTime, EndTime, UsageValue
+AWSQueueService,List,EUC1-Requests-Tier1,,03/09/21 19:00:00,03/09/21 20:00:00,2
+AWSQueueService,List,EUC1-C3DataTransfer-Out-Bytes,,03/09/21 19:00:00,03/09/21 20:00:00,0
+

@@ -63,6 +63,16 @@ from accloudtant import load_data, load_files
                 },
             },
         ),
+        (
+            "tests/fixtures/2021/03/SQS.csv",
+            {
+                "AWSQueueService": {
+                    "EU (Frankfurt)": [
+                        "EUC1-Requests-Tier1 2.000 Requests",
+                    ],
+                },
+            },
+        ),
     ],
 )
 def test_usage_records_totals(csv_file, expected):
