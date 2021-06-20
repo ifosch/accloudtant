@@ -1,4 +1,9 @@
-from accloudtant.aws import default_total_calc
+from accloudtant.aws import default_total_calc, UNITS_PER_CONCEPT
+
+UNITS_PER_CONCEPT |= {
+    "DNS-Queries": "Queries",
+    "HostedZone": "Hosted zones",
+}
 
 
 def omit(usage_record):

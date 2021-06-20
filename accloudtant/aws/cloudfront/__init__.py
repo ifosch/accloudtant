@@ -1,4 +1,8 @@
-from accloudtant.aws import default_total_calc, bytes_total_calc
+from accloudtant.aws import default_total_calc, bytes_total_calc, UNITS_PER_CONCEPT
+
+UNITS_PER_CONCEPT |= {
+    "Invalidations": "URL",
+}
 
 
 def omit(usage_record):
