@@ -1,4 +1,4 @@
-from accloudtant.aws import s3, cloudfront, data_transfer, route53
+from accloudtant.aws import s3, cloudfront, data_transfer, route53, sqs
 
 SERVICES = {
     "AmazonS3": {
@@ -12,6 +12,10 @@ SERVICES = {
     "AmazonRoute53": {
         "name": "Route 53",
         "module": route53,
+    },
+    "AWSQueueService": {
+        "name": "Simple Queue Service",
+        "module": sqs,
     },
     "Data Transfer": {
         "name": "Data Transfer",
