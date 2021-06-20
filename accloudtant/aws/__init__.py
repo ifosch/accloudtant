@@ -1,3 +1,8 @@
+UNITS_PER_CONCEPT = {
+    "Bandwidth": "GB",
+}
+
+
 def default_total_calc(entries):
     return sum([int(entry.value) for entry in entries])
 
@@ -19,14 +24,9 @@ def bytehrs_total_calc(entries):
 
 
 def unit(concept):
+    unit_text = UNITS_PER_CONCEPT.get(concept, "Requests")
     if concept.endswith("ByteHrs"):
-        return "GB-Mo"
-    elif concept.endswith("Bytes") or concept == "Bandwidth":
-        return "GB"
-    elif concept == "Invalidations":
-        return "URL"
-    elif concept == "DNS-Queries":
-        return "Queries"
-    elif concept == "HostedZone":
-        return "Hosted zones"
-    return "Requests"
+        unit_text = "GB-Mo"
+    elif concept.endswith("Bytes"):
+        unit_text = "GB"
+    return unit_text
