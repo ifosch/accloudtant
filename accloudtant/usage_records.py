@@ -38,7 +38,7 @@ class UsageRecords(object):
         services = {}
 
         for entry in self._data:
-            service_name = entry.service
+            service_name = entry.service_name
             if service_name not in services:
                 services[service_name] = UsageRecords()
             services[service_name].append(entry)
