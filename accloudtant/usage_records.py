@@ -9,6 +9,9 @@ class UsageRecords(object):
         self._data = data
         self.resource_areas = {}
 
+    def __len__(self):
+        return len(self._data)
+
     def __iter__(self):
         return self._data.__iter__()
 
@@ -52,8 +55,11 @@ class UsageRecords(object):
             services[service_name] = {}
             service = SERVICES[service_name]["module"]
             for area, entries in areas.areas():
+                concepts = [e.type for e in entries if not e.omit]
+                if len(concepts) == 0:
+                    continue
                 services[service_name][area] = []
-                for concept in set([entry.type for entry in entries if not entry.omit]):
+                for concept in set(concepts):
                     output_concept = concept
                     total_calc = service.get_total_calc(concept)
                     if service.is_bandwidth(concept):

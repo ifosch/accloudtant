@@ -19,6 +19,13 @@ SERVICES = {
     },
 }
 
+AREAS = {
+    "EUC1-": "EU (Frankfurt)",
+    "EU-": "Europe",
+    "US-": "United States",
+    "CA-": "Canada",
+}
+
 
 class UsageRecord(object):
     def __init__(self, data):
@@ -50,16 +57,9 @@ class UsageRecord(object):
 
     @property
     def area(self):
-        if self.type.startswith("EUC1-"):
-            return "EU (Frankfurt)"
-        elif self.type.startswith("US-"):
-            return "United States"
-        elif self.type.startswith("EU-"):
-            return "Europe"
-        elif self.type.startswith("CA-"):
-            return "Canada"
-        elif self.type == "Invalidations" or self.service_name == "AmazonRoute53":
+        if self.service == "AmazonRoute53":
             return "Global"
+        return AREAS.get(self.type[:5], AREAS.get(self.type[:3], "Global"))
 
     @property
     def is_data_transfer(self):
