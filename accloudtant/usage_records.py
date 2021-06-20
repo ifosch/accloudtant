@@ -1,4 +1,5 @@
 from accloudtant.usage_record import SERVICES
+from accloudtant.aws import unit
 
 
 class UsageRecords(object):
@@ -47,20 +48,17 @@ class UsageRecords(object):
 
     def totals(self):
         services = {}
-        for service, areas in self.services():
-            services[service] = {}
+        for service_name, areas in self.services():
+            services[service_name] = {}
+            service = SERVICES[service_name]["module"]
             for area, entries in areas.areas():
-                services[service][area] = []
+                services[service_name][area] = []
                 for concept in set([entry.type for entry in entries if not entry.omit]):
                     output_concept = concept
-                    total_calc = default_total_calc
-                    if concept.endswith("ByteHrs"):
-                        total_calc = bytehrs_total_calc
-                    elif concept.endswith("Bytes"):
-                        total_calc = bytes_total_calc
-                    if SERVICES[service]["module"].is_bandwidth(concept):
+                    total_calc = service.get_total_calc(concept)
+                    if service.is_bandwidth(concept):
                         output_concept = "Bandwidth"
-                    services[service][area].append(
+                    services[service_name][area].append(
                         (
                             output_concept,
                             "{:.3f}".format(
@@ -77,37 +75,3 @@ class UsageRecords(object):
                     )
 
         return services.items()
-
-
-def default_total_calc(entries):
-    return sum([int(entry.value) for entry in entries])
-
-
-def bytes_total_calc(entries):
-    return default_total_calc(entries) / 1073741824
-
-
-def bytehrs_total_calc(entries):
-    totals = {}
-    for entry in entries:
-        if entry.value not in totals:
-            totals[entry.value] = []
-        totals[entry.value].append(entry)
-    total = 0
-    for value, values in totals.items():
-        total += int(value) * len(values) / 24
-    return total / 1073741824 / len(entries)
-
-
-def unit(concept):
-    if concept.endswith("ByteHrs"):
-        return "GB-Mo"
-    elif concept.endswith("Bytes") or concept == "Bandwidth":
-        return "GB"
-    elif concept == "Invalidations":
-        return "URL"
-    elif concept == "DNS-Queries":
-        return "Queries"
-    elif concept == "HostedZone":
-        return "Hosted zones"
-    return "Requests"
