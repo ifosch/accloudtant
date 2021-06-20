@@ -25,3 +25,7 @@ jobs:
       - name: Run tests
         run: |
           poetry run pytest --cov=accloudtant --cov-report term-missing:skip-covered
+      - name: Run complexity analysis
+        run: |
+          test $(poetry run radon cc --md -nb accloudtant/ | grep -E "\| [A-F] \|$" | wc -l) -eq 0 \
+          || poetry run radon cc --md -nb accloudtant/
