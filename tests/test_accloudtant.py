@@ -71,9 +71,10 @@ def test_usage_records_totals(csv_file, expected):
     for service, areas in usage.totals():
         assert service in expected
         for area, concepts in areas.items():
-            assert area in expected[service]
-            for c, v, u in concepts:
-                assert "{} {} {}".format(c, v, u) in expected[service][area]
+            if len(concepts) > 0:
+                assert area in expected[service]
+                for c, v, u in concepts:
+                    assert "{} {} {}".format(c, v, u) in expected[service][area]
 
 
 @pytest.mark.parametrize(
@@ -152,6 +153,7 @@ def test_load_files(csv_files, expected):
     for service, areas in usage.totals():
         assert service in expected
         for area, concepts in areas.items():
-            assert area in expected[service]
-            for c, v, u in concepts:
-                assert "{} {} {}".format(c, v, u) in expected[service][area]
+            if len(concepts) > -0:
+                assert area in expected[service]
+                for c, v, u in concepts:
+                    assert "{} {} {}".format(c, v, u) in expected[service][area]

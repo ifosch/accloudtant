@@ -17,6 +17,7 @@ if __name__ == "__main__":
     for service, areas in usage.totals():
         print(service)
         for area, concepts in areas.items():
-            print("\t", area)
-            for c, v, u in concepts:
-                print("\t\t{}\t{} {}".format(c, v, u))
+            if len(concepts) > 0:
+                print("\t", area)
+                for c, v, u in concepts:
+                    print("\t\t{}\t{} {}".format(c, v, u))
