@@ -8,12 +8,6 @@ class UsageRecords(object):
         self._data = data
         self.resource_areas = {}
 
-    def __getitem__(self, i):
-        return self._data[i]
-
-    def __len__(self):
-        return len(self._data)
-
     def __iter__(self):
         return self._data.__iter__()
 
@@ -50,9 +44,6 @@ class UsageRecords(object):
             services[service_name].append(entry)
 
         return services.items()
-
-    def data_transfers(self):
-        return UsageRecords([entry for entry in self._data if entry.is_data_transfer])
 
     def totals(self):
         services = {}

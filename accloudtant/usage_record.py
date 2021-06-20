@@ -66,9 +66,3 @@ class UsageRecord(object):
         if self.service in SERVICES:
             return SERVICES[self.service]["module"].omit(self)
         return False
-
-    @property
-    def is_bandwidth(self):
-        if self.service in SERVICES:
-            return SERVICES[self.service]["module"].is_bandwidth(self)
-        return False
